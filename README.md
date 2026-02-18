@@ -1,3 +1,4 @@
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -165,7 +166,7 @@
 
         <a href="https://www.youtube.com/watch?v=2_8Cade2Yg8" target="_blank" class="cyber-card flex items-center p-4 rounded-lg group">
             <div class="flex-grow">
-                <p class="font-bold text-slate-200 group-hover:text-white">Just Bins </p>
+                <p class="font-bold text-slate-200 group-hover:text-white">Just Bins Feature</p>
             </div>
             <span class="mono text-[10px] text-slate-600">03</span>
         </a>
