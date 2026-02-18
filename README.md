@@ -257,8 +257,7 @@
 
         <!-- Cinema Section -->
         <div class="category-header">
-            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase">/India Projects/h2>
-        </div>
+            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase">/India Projects
 
         <a href="https://www.youtube.com/watch?v=7bOpbHsEeEA" target="_blank" class="cyber-card flex items-center p-4 rounded-lg group">
             <div class="flex-grow">
@@ -314,7 +313,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
             </a>
         </div>
-    </main>
+    
 
     <footer class="mt-24 pb-12 flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity">
         <div class="flex space-x-8 mb-8">
