@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -141,7 +141,7 @@
         
         <!-- CBC Section -->
         <div class="category-header">
-            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase">/Broadcast_Data</h2>
+            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase">/CBC Highlights Project</h2>
         </div>
         
         <a href="https://www.youtube.com/watch?v=h1bbwAwPPFI" target="_blank" class="cyber-card flex items-center p-4 rounded-lg group">
@@ -201,7 +201,7 @@
 
         <!-- SGI Section -->
         <div class="category-header">
-            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase">/Digital_Managed_Assets</h2>
+            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase">/SGI- Digital Media Manager</h2>
         </div>
 
         <a href="https://vimeo.com/790500275" target="_blank" class="cyber-card flex items-center p-4 rounded-lg group">
@@ -258,7 +258,7 @@
 
         <!-- Cinema Section -->
         <div class="category-header">
-            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase">/Visual_Cinematics</h2>
+            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase">/India Projects/h2>
         </div>
 
         <a href="https://www.youtube.com/watch?v=7bOpbHsEeEA" target="_blank" class="cyber-card flex items-center p-4 rounded-lg group">
