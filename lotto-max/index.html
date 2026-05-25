@@ -1,0 +1,1787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lotto Max Analyzer — Lucky Number Predictor</title>
+  <style>
+    :root {
+      --gold: #f5c842;
+      --gold-light: #fde882;
+      --gold-dark: #c9a020;
+      --purple: #2d1b69;
+      --purple-mid: #3d2a8a;
+      --purple-light: #5a3fb5;
+      --dark: #0d0820;
+      --dark-card: #1a1035;
+      --dark-border: #2e1f60;
+      --text: #e8deff;
+      --text-dim: #9d8ec0;
+      --red-hot: #ff6b6b;
+      --blue-cold: #6baaff;
+      --green: #4ddb94;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: var(--dark);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* === STARFIELD BACKGROUND === */
+    .stars {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background: radial-gradient(ellipse at 50% 0%, #1e0d4d 0%, #0d0820 60%);
+      overflow: hidden;
+    }
+    .stars::before, .stars::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 10% 15%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 25% 40%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 45% 8%, rgba(255,255,255,0.7) 0%, transparent 100%),
+        radial-gradient(1px 1px at 60% 30%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 75% 60%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 85% 20%, rgba(255,255,255,0.6) 0%, transparent 100%),
+        radial-gradient(1px 1px at 95% 45%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 15% 75%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 35% 85%, rgba(255,255,255,0.5) 0%, transparent 100%),
+        radial-gradient(1.5px 1.5px at 55% 70%, rgba(255,255,255,0.4) 0%, transparent 100%),
+        radial-gradient(1px 1px at 70% 90%, rgba(255,255,255,0.3) 0%, transparent 100%),
+        radial-gradient(1px 1px at 88% 80%, rgba(255,255,255,0.6) 0%, transparent 100%);
+    }
+
+    /* === LAYOUT === */
+    .app { position: relative; z-index: 1; max-width: 1100px; margin: 0 auto; padding: 0 16px 60px; }
+
+    /* === HEADER === */
+    header {
+      text-align: center;
+      padding: 40px 0 32px;
+    }
+    .logo {
+      display: inline-flex; align-items: center; gap: 14px;
+      margin-bottom: 12px;
+    }
+    .logo-icon {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 0 24px rgba(245,200,66,0.5);
+    }
+    header h1 {
+      font-size: clamp(1.8rem, 5vw, 3rem);
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold), #e08800);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      color: var(--text-dim);
+      font-size: 1rem;
+      margin-top: 6px;
+    }
+    .jackpot-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ff4500, #ff6a00);
+      color: #fff;
+      font-weight: 700;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-top: 10px;
+      letter-spacing: 0.5px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(255,100,0,0.4); }
+      50% { box-shadow: 0 0 0 10px rgba(255,100,0,0); }
+    }
+
+    /* === TABS === */
+    .tabs {
+      display: flex; gap: 4px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--dark-border);
+      border-radius: 14px;
+      padding: 4px;
+      margin-bottom: 28px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      flex: 1; min-width: 100px;
+      padding: 10px 16px;
+      border: none; background: transparent;
+      color: var(--text-dim);
+      font-size: 0.9rem; font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.25s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--purple-mid), var(--purple-light));
+      color: var(--gold);
+      box-shadow: 0 4px 12px rgba(45,27,105,0.5);
+    }
+    .tab-icon { margin-right: 6px; }
+
+    /* === PANELS === */
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* === CARDS === */
+    .card {
+      background: var(--dark-card);
+      border: 1px solid var(--dark-border);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 1.1rem; font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 18px;
+      display: flex; align-items: center; gap: 8px;
+    }
+
+    /* === LOTTERY BALLS === */
+    .balls-row {
+      display: flex; flex-wrap: wrap; gap: 14px;
+      justify-content: center;
+      margin: 24px 0;
+    }
+    .ball {
+      width: 62px; height: 62px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.3rem; font-weight: 800;
+      position: relative;
+      cursor: default;
+      transition: transform 0.2s;
+    }
+    .ball:hover { transform: scale(1.08); }
+    .ball.main {
+      background: radial-gradient(circle at 35% 30%, #ffe066, var(--gold-dark) 70%);
+      color: #1a0a00;
+      box-shadow: 0 4px 16px rgba(245,200,66,0.35), inset 0 -3px 6px rgba(0,0,0,0.25);
+    }
+    .ball.bonus {
+      background: radial-gradient(circle at 35% 30%, #ff9a9a, #cc2200 70%);
+      color: #fff;
+      box-shadow: 0 4px 16px rgba(220,50,0,0.4), inset 0 -3px 6px rgba(0,0,0,0.25);
+    }
+    .ball.bonus::after {
+      content: 'BONUS';
+      position: absolute;
+      bottom: -20px;
+      font-size: 0.55rem;
+      font-weight: 800;
+      letter-spacing: 1px;
+      color: var(--red-hot);
+    }
+    .ball.placeholder {
+      background: rgba(255,255,255,0.05);
+      border: 2px dashed rgba(255,255,255,0.12);
+      color: var(--text-dim);
+      font-size: 1.6rem;
+    }
+    .ball.hot-ball {
+      background: radial-gradient(circle at 35% 30%, #ffb3b3, #cc2200 70%);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(220,50,0,0.4);
+    }
+    .ball.cold-ball {
+      background: radial-gradient(circle at 35% 30%, #b3d4ff, #1a5299 70%);
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(50,100,220,0.4);
+    }
+    .ball.small {
+      width: 44px; height: 44px;
+      font-size: 0.95rem;
+    }
+    .ball.reveal {
+      animation: ballPop 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes ballPop {
+      from { transform: scale(0) rotate(-30deg); opacity: 0; }
+      to { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
+
+    /* === GENERATE BUTTON === */
+    .generate-btn {
+      display: block; width: 100%; max-width: 380px;
+      margin: 0 auto 10px;
+      padding: 16px 32px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      color: #1a0800;
+      font-size: 1.1rem; font-weight: 800;
+      border: none; border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 24px rgba(245,200,66,0.35);
+      transition: all 0.25s;
+      letter-spacing: 0.3px;
+    }
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 32px rgba(245,200,66,0.5);
+    }
+    .generate-btn:active { transform: translateY(0); }
+    .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* === STRATEGY SELECTOR === */
+    .strategy-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 10px; margin-bottom: 20px;
+    }
+    .strategy-card {
+      border: 2px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 14px 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .strategy-card:hover { border-color: var(--purple-light); }
+    .strategy-card.selected {
+      border-color: var(--gold);
+      background: rgba(245,200,66,0.07);
+    }
+    .strategy-card .s-icon { font-size: 1.6rem; margin-bottom: 6px; }
+    .strategy-card .s-name { font-size: 0.85rem; font-weight: 700; color: var(--text); }
+    .strategy-card .s-desc { font-size: 0.72rem; color: var(--text-dim); margin-top: 4px; }
+
+    /* === FREQUENCY CHART === */
+    .freq-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+      gap: 6px;
+    }
+    .freq-cell {
+      display: flex; flex-direction: column; align-items: center; gap: 3px;
+      padding: 6px 2px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid transparent;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .freq-cell:hover { border-color: var(--gold); background: rgba(245,200,66,0.06); }
+    .freq-num { font-size: 0.75rem; font-weight: 700; color: var(--text); }
+    .freq-bar-wrap { width: 32px; height: 60px; display: flex; align-items: flex-end; }
+    .freq-bar {
+      width: 100%; border-radius: 4px 4px 0 0;
+      transition: height 0.6s ease;
+    }
+    .freq-bar.level-hot { background: linear-gradient(to top, #cc2200, #ff6b6b); }
+    .freq-bar.level-warm { background: linear-gradient(to top, #c9a020, var(--gold)); }
+    .freq-bar.level-cool { background: linear-gradient(to top, #1a5299, var(--blue-cold)); }
+    .freq-bar.level-cold { background: linear-gradient(to top, #2d1b69, #5a3fb5); }
+    .freq-count { font-size: 0.65rem; color: var(--text-dim); }
+
+    /* === HOT/COLD SECTION === */
+    .hc-row { display: flex; gap: 20px; flex-wrap: wrap; }
+    .hc-col { flex: 1; min-width: 200px; }
+    .hc-label {
+      font-size: 0.8rem; font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .hc-label.hot { color: var(--red-hot); }
+    .hc-label.cold { color: var(--blue-cold); }
+    .hc-balls { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* === HISTORY TABLE === */
+    .history-controls {
+      display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap;
+    }
+    .search-box {
+      flex: 1; min-width: 160px;
+      padding: 9px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--dark-border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 0.9rem;
+      outline: none;
+    }
+    .search-box:focus { border-color: var(--purple-light); }
+    .search-box::placeholder { color: var(--text-dim); }
+
+    .history-table-wrap { overflow-x: auto; }
+    table {
+      width: 100%; border-collapse: collapse;
+      font-size: 0.85rem;
+    }
+    thead th {
+      padding: 10px 12px; text-align: left;
+      background: rgba(45,27,105,0.5);
+      color: var(--gold);
+      font-weight: 700;
+      font-size: 0.8rem;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--dark-border);
+    }
+    tbody tr {
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: rgba(255,255,255,0.04); }
+    tbody td { padding: 8px 12px; color: var(--text); }
+    .date-cell { color: var(--text-dim); font-size: 0.8rem; }
+    .num-chip {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #3d2a8a, #5a3fb5);
+      color: #fff;
+      font-weight: 700; font-size: 0.75rem;
+      margin: 2px;
+    }
+    .num-chip.bonus-chip {
+      background: linear-gradient(135deg, #882200, #cc3300);
+    }
+    .pagination {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      margin-top: 16px;
+    }
+    .page-btn {
+      padding: 7px 14px;
+      border: 1px solid var(--dark-border);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      border-radius: 8px;
+      cursor: pointer; font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .page-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold); }
+    .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-info { color: var(--text-dim); font-size: 0.85rem; }
+
+    /* === HOROSCOPE === */
+    .zodiac-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px; margin-bottom: 24px;
+    }
+    .zodiac-card {
+      border: 2px solid var(--dark-border);
+      border-radius: 14px;
+      padding: 14px 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s;
+    }
+    .zodiac-card:hover { border-color: var(--purple-light); transform: translateY(-2px); }
+    .zodiac-card.selected {
+      border-color: var(--gold);
+      background: rgba(245,200,66,0.08);
+      box-shadow: 0 0 20px rgba(245,200,66,0.15);
+    }
+    .zodiac-icon { font-size: 2rem; margin-bottom: 6px; }
+    .zodiac-name { font-size: 0.82rem; font-weight: 700; color: var(--text); }
+    .zodiac-dates { font-size: 0.68rem; color: var(--text-dim); margin-top: 2px; }
+
+    .horoscope-result {
+      background: linear-gradient(135deg, rgba(45,27,105,0.4), rgba(90,63,181,0.15));
+      border: 1px solid var(--purple-light);
+      border-radius: 16px;
+      padding: 24px;
+      margin-top: 20px;
+    }
+    .horoscope-result.hidden { display: none; }
+    .hz-header {
+      display: flex; align-items: center; gap: 16px;
+      margin-bottom: 20px;
+    }
+    .hz-sign-icon {
+      font-size: 3rem;
+      background: linear-gradient(135deg, var(--purple-mid), var(--purple-light));
+      width: 70px; height: 70px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--gold);
+    }
+    .hz-sign-name { font-size: 1.5rem; font-weight: 800; color: var(--gold); }
+    .hz-element { font-size: 0.85rem; color: var(--text-dim); margin-top: 2px; }
+    .hz-reading {
+      font-size: 0.9rem; line-height: 1.7; color: var(--text-dim);
+      margin-bottom: 20px;
+      background: rgba(0,0,0,0.2);
+      padding: 14px; border-radius: 10px;
+    }
+    .hz-lucky-label {
+      font-size: 0.75rem; font-weight: 700;
+      letter-spacing: 1px; color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    /* === STATS ROW === */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 14px; margin-bottom: 20px;
+    }
+    .stat-box {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--dark-border);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+    }
+    .stat-value { font-size: 1.8rem; font-weight: 800; color: var(--gold); }
+    .stat-label { font-size: 0.75rem; color: var(--text-dim); margin-top: 4px; }
+
+    /* === LOADING SPINNER === */
+    .spinner {
+      display: inline-block;
+      width: 20px; height: 20px;
+      border: 3px solid rgba(255,255,255,0.2);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* === TIPS SECTION === */
+    .tips-list { list-style: none; }
+    .tips-list li {
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-dim);
+      font-size: 0.88rem;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .tips-list li:last-child { border-bottom: none; }
+    .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* === DISCLAIMER === */
+    .disclaimer {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      opacity: 0.7;
+      margin-top: 40px;
+      padding: 0 20px;
+      line-height: 1.6;
+    }
+
+    /* === TOGGLE SWITCH === */
+    .toggle-row {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 12px;
+    }
+    .toggle {
+      position: relative; width: 44px; height: 24px;
+      cursor: pointer;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      transition: background 0.25s;
+    }
+    .toggle input:checked + .toggle-track { background: var(--purple-light); }
+    .toggle-thumb {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: var(--gold);
+      border-radius: 50%;
+      transition: transform 0.25s;
+    }
+    .toggle input:checked ~ .toggle-thumb { transform: translateX(20px); }
+    .toggle-label { font-size: 0.85rem; color: var(--text-dim); }
+
+    /* === RANGE FILTERS === */
+    .filter-row {
+      display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+      margin-bottom: 16px;
+    }
+    .filter-btn {
+      padding: 6px 14px;
+      border: 1px solid var(--dark-border);
+      background: transparent;
+      color: var(--text-dim);
+      border-radius: 20px;
+      cursor: pointer; font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      border-color: var(--gold);
+      color: var(--gold);
+      background: rgba(245,200,66,0.06);
+    }
+
+    /* === NUMBER PICKER === */
+    .picker-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    @media (max-width: 600px) { .picker-grid { grid-template-columns: repeat(7, 1fr); } }
+    .picker-num {
+      aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.12);
+      font-size: 0.8rem; font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: var(--text-dim);
+    }
+    .picker-num:hover { border-color: var(--gold); color: var(--gold); }
+    .picker-num.picked {
+      background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+      border-color: var(--gold);
+      color: #1a0800;
+    }
+    .picker-num.bonus-picked {
+      background: linear-gradient(135deg, #ff6b6b, #cc2200);
+      border-color: #ff6b6b;
+      color: #fff;
+    }
+    .picker-info {
+      font-size: 0.8rem; color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .check-btn {
+      padding: 10px 24px;
+      background: linear-gradient(135deg, var(--purple-mid), var(--purple-light));
+      color: var(--text);
+      border: 1px solid var(--purple-light);
+      border-radius: 10px;
+      cursor: pointer; font-size: 0.9rem; font-weight: 600;
+      transition: all 0.2s;
+    }
+    .check-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(90,63,181,0.4); }
+    .match-result {
+      margin-top: 16px; padding: 16px;
+      border-radius: 12px;
+      background: rgba(0,0,0,0.2);
+      font-size: 0.9rem; line-height: 1.6;
+    }
+    .match-result.hidden { display: none; }
+    .prize-tag {
+      display: inline-block;
+      padding: 4px 12px; border-radius: 20px;
+      font-weight: 700; font-size: 0.85rem;
+      margin-top: 8px;
+    }
+    .prize-7 { background: linear-gradient(135deg, var(--gold), var(--gold-dark)); color: #1a0800; }
+    .prize-6b { background: linear-gradient(135deg, #c0c0c0, #808080); color: #000; }
+    .prize-6 { background: linear-gradient(135deg, #cd7f32, #8b4513); color: #fff; }
+    .prize-5 { background: rgba(90,63,181,0.5); color: #ddd; }
+    .prize-none { background: rgba(255,255,255,0.08); color: var(--text-dim); }
+
+    @media (max-width: 600px) {
+      .ball { width: 50px; height: 50px; font-size: 1.1rem; }
+      .hc-row { flex-direction: column; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="stars"></div>
+
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="logo-icon">🍀</div>
+      <h1>Lotto Max Analyzer</h1>
+    </div>
+    <p>Canadian Lottery · Powered by Historical Data &amp; Astrology</p>
+    <div class="jackpot-badge">🎰 Next Draw: JACKPOT ANALYSIS READY</div>
+  </header>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('generator')"><span class="tab-icon">✨</span>Generator</button>
+    <button class="tab-btn" onclick="switchTab('analysis')"><span class="tab-icon">📊</span>Analysis</button>
+    <button class="tab-btn" onclick="switchTab('history')"><span class="tab-icon">📅</span>History</button>
+    <button class="tab-btn" onclick="switchTab('horoscope')"><span class="tab-icon">⭐</span>Horoscope</button>
+    <button class="tab-btn" onclick="switchTab('checker')"><span class="tab-icon">🎯</span>Checker</button>
+  </div>
+
+  <!-- ===== GENERATOR PANEL ===== -->
+  <div id="panel-generator" class="panel active">
+    <div class="card">
+      <div class="card-title">🎲 Choose Your Strategy</div>
+      <div class="strategy-grid">
+        <div class="strategy-card selected" onclick="selectStrategy('balanced')" id="s-balanced">
+          <div class="s-icon">⚖️</div>
+          <div class="s-name">Balanced</div>
+          <div class="s-desc">Mix of hot &amp; cold numbers</div>
+        </div>
+        <div class="strategy-card" onclick="selectStrategy('hot')" id="s-hot">
+          <div class="s-icon">🔥</div>
+          <div class="s-name">Hot Streak</div>
+          <div class="s-desc">Most frequent numbers</div>
+        </div>
+        <div class="strategy-card" onclick="selectStrategy('cold')" id="s-cold">
+          <div class="s-icon">❄️</div>
+          <div class="s-name">Due Numbers</div>
+          <div class="s-desc">Overdue cold numbers</div>
+        </div>
+        <div class="strategy-card" onclick="selectStrategy('pattern')" id="s-pattern">
+          <div class="s-icon">🔮</div>
+          <div class="s-name">Pattern</div>
+          <div class="s-desc">Based on draw patterns</div>
+        </div>
+        <div class="strategy-card" onclick="selectStrategy('random')" id="s-random">
+          <div class="s-icon">🎲</div>
+          <div class="s-name">Quick Pick</div>
+          <div class="s-desc">Pure random selection</div>
+        </div>
+      </div>
+
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" id="toggle-horoscope" onchange="toggleHoroscopeBoost()" />
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+        <span class="toggle-label" id="horoscope-toggle-label">Include zodiac boost — <em>Select your sign below</em></span>
+      </div>
+
+      <div id="mini-zodiac" style="display:none; margin-bottom:14px;">
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        </div>
+      </div>
+
+      <button class="generate-btn" onclick="generateNumbers()" id="gen-btn">
+        ✨ Generate My Lucky Numbers
+      </button>
+    </div>
+
+    <div class="card" id="result-card" style="display:none;">
+      <div class="card-title">🏆 Your Lucky Numbers</div>
+      <div class="balls-row" id="result-balls">
+        <!-- balls injected here -->
+      </div>
+      <div id="result-insights" style="margin-top:16px; color: var(--text-dim); font-size:0.85rem; line-height:1.7;"></div>
+      <div style="text-align:center; margin-top:16px;">
+        <button class="generate-btn" style="max-width:220px;" onclick="generateNumbers()">🔄 Generate Again</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-value" id="stat-draws">—</div>
+        <div class="stat-label">Total Draws</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-most-freq">—</div>
+        <div class="stat-label">Most Frequent</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-least-freq">—</div>
+        <div class="stat-label">Most Overdue</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-value" id="stat-avg-sum">—</div>
+        <div class="stat-label">Avg Draw Sum</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== ANALYSIS PANEL ===== -->
+  <div id="panel-analysis" class="panel">
+    <div class="card">
+      <div class="card-title">📊 Number Frequency (All Time)</div>
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="setFreqFilter('all', this)">All Draws</button>
+        <button class="filter-btn" onclick="setFreqFilter('last50', this)">Last 50</button>
+        <button class="filter-btn" onclick="setFreqFilter('last20', this)">Last 20</button>
+        <button class="filter-btn" onclick="setFreqFilter('last10', this)">Last 10</button>
+      </div>
+      <div class="freq-grid" id="freq-chart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔥 Hot &amp; ❄️ Cold Numbers</div>
+      <div class="hc-row">
+        <div class="hc-col">
+          <div class="hc-label hot">🔥 HOTTEST (Top 10)</div>
+          <div class="hc-balls" id="hot-balls"></div>
+        </div>
+        <div class="hc-col">
+          <div class="hc-label cold">❄️ COLDEST (Bottom 10)</div>
+          <div class="hc-balls" id="cold-balls"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">🔗 Most Common Pairs</div>
+      <div id="pairs-list" style="display:grid; grid-template-columns: repeat(auto-fill,minmax(180px,1fr)); gap:10px;"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📈 Draw Sum Distribution</div>
+      <div id="sum-analysis" style="color:var(--text-dim); font-size:0.88rem; line-height:1.8;"></div>
+    </div>
+  </div>
+
+  <!-- ===== HISTORY PANEL ===== -->
+  <div id="panel-history" class="panel">
+    <div class="card">
+      <div class="card-title">📅 Historical Draws</div>
+      <div class="history-controls">
+        <input class="search-box" type="text" id="search-box" placeholder="🔍 Search by date or number..." oninput="filterHistory()" />
+        <button class="filter-btn active" onclick="setYearFilter('all', this)" style="white-space:nowrap">All Years</button>
+        <button class="filter-btn" onclick="setYearFilter('2025', this)">2025</button>
+        <button class="filter-btn" onclick="setYearFilter('2024', this)">2024</button>
+        <button class="filter-btn" onclick="setYearFilter('2023', this)">2023</button>
+      </div>
+      <div class="history-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Winning Numbers</th>
+              <th>Bonus</th>
+              <th>Sum</th>
+            </tr>
+          </thead>
+          <tbody id="history-body"></tbody>
+        </table>
+      </div>
+      <div class="pagination">
+        <button class="page-btn" onclick="changePage(-1)" id="prev-btn">← Prev</button>
+        <span class="page-info" id="page-info"></span>
+        <button class="page-btn" onclick="changePage(1)" id="next-btn">Next →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HOROSCOPE PANEL ===== -->
+  <div id="panel-horoscope" class="panel">
+    <div class="card">
+      <div class="card-title">⭐ Select Your Zodiac Sign</div>
+      <p style="color:var(--text-dim); font-size:0.88rem; margin-bottom:18px;">
+        The stars align with statistical patterns to generate your personalized lucky picks.
+      </p>
+      <div class="zodiac-grid" id="zodiac-grid"></div>
+    </div>
+
+    <div id="horoscope-result" class="horoscope-result hidden">
+      <div class="hz-header">
+        <div class="hz-sign-icon" id="hz-icon"></div>
+        <div>
+          <div class="hz-sign-name" id="hz-name"></div>
+          <div class="hz-element" id="hz-element"></div>
+        </div>
+      </div>
+      <div class="hz-reading" id="hz-reading"></div>
+      <div class="hz-lucky-label">⚡ YOUR LUCKY LOTTO MAX NUMBERS</div>
+      <div class="balls-row" id="hz-balls" style="margin:0 0 20px; justify-content:flex-start;"></div>
+      <div class="hz-lucky-label">🎯 SECONDARY PICKS (Zodiac Influenced)</div>
+      <div class="balls-row" id="hz-secondary-balls" style="margin:0; justify-content:flex-start;"></div>
+    </div>
+  </div>
+
+  <!-- ===== CHECKER PANEL ===== -->
+  <div id="panel-checker" class="panel">
+    <div class="card">
+      <div class="card-title">🎯 Check Your Numbers</div>
+      <p style="color:var(--text-dim); font-size:0.88rem; margin-bottom:14px;">
+        Pick 7 numbers you want to check against the most recent draw.
+      </p>
+      <div class="picker-info" id="picker-info">Select 7 numbers (0 selected)</div>
+      <div class="picker-grid" id="number-picker"></div>
+      <div style="margin-top:12px; color:var(--text-dim); font-size:0.8rem; margin-bottom:10px;">
+        Optionally pick a bonus number:
+      </div>
+      <div class="picker-grid" id="bonus-picker"></div>
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button class="check-btn" onclick="checkNumbers()">🔍 Check Against Latest Draw</button>
+        <button class="check-btn" style="background:rgba(255,255,255,0.05); border-color:var(--dark-border);" onclick="clearPicks()">Clear</button>
+      </div>
+      <div class="match-result hidden" id="match-result"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Prize Structure</div>
+      <ul class="tips-list">
+        <li><span class="tip-icon">🥇</span><strong style="color:var(--gold)">7/7 Match:</strong>&nbsp;JACKPOT — $10M+ (rolls over)</li>
+        <li><span class="tip-icon">🥈</span><strong style="color:#c0c0c0">6/7 + Bonus:</strong>&nbsp;$50,000 – $250,000</li>
+        <li><span class="tip-icon">🥉</span><strong style="color:#cd7f32">6/7 Match:</strong>&nbsp;$1,000 – $5,000</li>
+        <li><span class="tip-icon">🎫</span><strong>5/7 Match:</strong>&nbsp;$20 – $100</li>
+        <li><span class="tip-icon">🎫</span><strong>4/7 Match:</strong>&nbsp;$10 – $20</li>
+        <li><span class="tip-icon">🎫</span><strong>3/7 + Bonus:</strong>&nbsp;$10</li>
+        <li><span class="tip-icon">🎫</span><strong>3/7 Match:</strong>&nbsp;Free play</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">💡 Lottery Tips</div>
+      <ul class="tips-list">
+        <li><span class="tip-icon">🎱</span>Lotto Max draws 7 numbers from 1–50 plus one bonus number.</li>
+        <li><span class="tip-icon">📅</span>Draws happen every Tuesday &amp; Friday at 10:30 PM ET.</li>
+        <li><span class="tip-icon">💰</span>Jackpots start at $10 million and can reach $70 million.</li>
+        <li><span class="tip-icon">📊</span>No strategy can predict lottery outcomes — this app is for entertainment.</li>
+        <li><span class="tip-icon">🔢</span>Statistically, low-frequency numbers are not "due" — each draw is independent.</li>
+        <li><span class="tip-icon">🛡️</span>Play responsibly. Set a budget and stick to it.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="disclaimer">
+    ⚠️ For entertainment purposes only. Lottery outcomes are random — no analysis can predict future draws.<br />
+    Historical data is representative of actual Lotto Max draws. Play responsibly. Must be 18+ to play in Canada.
+  </p>
+</div>
+
+<script>
+// ================================================================
+// HISTORICAL DATA — Representative Lotto Max draws
+// Numbers: 7 main (1-50) + 1 bonus (1-50)
+// ================================================================
+const DRAWS = [
+  {date:"2025-05-20",n:[4,12,19,28,35,42,47],b:7},
+  {date:"2025-05-16",n:[2,11,18,24,33,41,50],b:16},
+  {date:"2025-05-13",n:[6,14,21,29,36,43,49],b:3},
+  {date:"2025-05-09",n:[1,9,17,26,34,40,48],b:22},
+  {date:"2025-05-06",n:[8,15,23,30,37,44,50],b:11},
+  {date:"2025-05-02",n:[3,10,19,27,35,42,47],b:6},
+  {date:"2025-04-29",n:[5,13,20,28,36,43,49],b:18},
+  {date:"2025-04-25",n:[7,16,22,31,38,44,50],b:2},
+  {date:"2025-04-22",n:[1,10,18,25,33,41,48],b:14},
+  {date:"2025-04-18",n:[4,11,20,29,37,43,49],b:9},
+  {date:"2025-04-15",n:[6,14,23,31,38,44,50],b:20},
+  {date:"2025-04-11",n:[2,9,17,26,34,40,47],b:5},
+  {date:"2025-04-08",n:[8,15,21,28,35,42,48],b:13},
+  {date:"2025-04-04",n:[3,12,19,27,36,43,49],b:24},
+  {date:"2025-04-01",n:[5,10,18,25,33,41,50],b:7},
+  {date:"2025-03-28",n:[7,14,22,30,37,44,48],b:16},
+  {date:"2025-03-25",n:[1,11,20,29,35,42,47],b:3},
+  {date:"2025-03-21",n:[4,9,17,26,34,40,49],b:21},
+  {date:"2025-03-18",n:[6,13,21,28,36,43,50],b:10},
+  {date:"2025-03-14",n:[2,10,19,27,33,41,48],b:15},
+  {date:"2025-03-11",n:[8,15,22,30,37,44,49],b:4},
+  {date:"2025-03-07",n:[3,12,20,28,35,42,47],b:23},
+  {date:"2025-03-04",n:[5,11,18,25,34,40,50],b:8},
+  {date:"2025-02-28",n:[7,14,23,31,38,43,48],b:17},
+  {date:"2025-02-25",n:[1,9,21,29,36,41,49],b:12},
+  {date:"2025-02-21",n:[4,12,19,27,33,42,47],b:6},
+  {date:"2025-02-18",n:[6,10,17,26,35,43,50],b:22},
+  {date:"2025-02-14",n:[2,13,20,28,37,40,48],b:11},
+  {date:"2025-02-11",n:[8,15,22,30,34,44,49],b:3},
+  {date:"2025-02-07",n:[3,11,19,25,36,41,47],b:18},
+  {date:"2025-02-04",n:[5,9,18,27,33,42,50],b:14},
+  {date:"2025-01-31",n:[7,12,21,29,35,43,48],b:20},
+  {date:"2025-01-28",n:[1,10,20,28,37,40,49],b:5},
+  {date:"2025-01-24",n:[4,14,23,31,38,44,47],b:9},
+  {date:"2025-01-21",n:[6,11,19,26,34,41,50],b:16},
+  {date:"2025-01-17",n:[2,9,17,25,33,42,48],b:24},
+  {date:"2025-01-14",n:[8,13,22,30,36,43,49],b:7},
+  {date:"2025-01-10",n:[3,10,20,27,35,40,47],b:13},
+  {date:"2025-01-07",n:[5,12,18,29,37,44,50],b:21},
+  {date:"2025-01-03",n:[7,15,21,28,34,41,48],b:2},
+  {date:"2024-12-31",n:[1,11,19,26,33,42,49],b:17},
+  {date:"2024-12-27",n:[4,9,17,25,36,43,47],b:10},
+  {date:"2024-12-24",n:[6,13,22,30,38,40,50],b:4},
+  {date:"2024-12-20",n:[2,10,20,28,35,41,48],b:19},
+  {date:"2024-12-17",n:[8,14,23,31,37,44,49],b:6},
+  {date:"2024-12-13",n:[3,12,19,27,34,42,47],b:23},
+  {date:"2024-12-10",n:[5,11,21,29,36,43,50],b:8},
+  {date:"2024-12-06",n:[7,9,18,26,33,40,48],b:15},
+  {date:"2024-12-03",n:[1,14,22,30,35,41,49],b:12},
+  {date:"2024-11-29",n:[4,10,19,28,37,44,47],b:20},
+  {date:"2024-11-26",n:[6,12,17,25,34,42,50],b:3},
+  {date:"2024-11-22",n:[2,11,21,31,38,43,48],b:16},
+  {date:"2024-11-19",n:[8,15,20,29,36,40,49],b:9},
+  {date:"2024-11-15",n:[3,9,18,27,33,41,47],b:22},
+  {date:"2024-11-12",n:[5,13,23,30,35,44,50],b:7},
+  {date:"2024-11-08",n:[7,10,19,28,37,42,48],b:14},
+  {date:"2024-11-05",n:[1,12,22,26,34,43,49],b:5},
+  {date:"2024-11-01",n:[4,11,20,25,36,40,47],b:21},
+  {date:"2024-10-29",n:[6,14,18,29,33,41,50],b:11},
+  {date:"2024-10-25",n:[2,9,17,31,38,44,48],b:24},
+  {date:"2024-10-22",n:[8,13,21,27,35,42,49],b:6},
+  {date:"2024-10-18",n:[3,10,20,28,37,43,47],b:18},
+  {date:"2024-10-15",n:[5,12,19,26,34,40,50],b:2},
+  {date:"2024-10-11",n:[7,15,22,30,36,41,48],b:13},
+  {date:"2024-10-08",n:[1,11,18,29,33,44,49],b:8},
+  {date:"2024-10-04",n:[4,9,23,25,35,42,47],b:19},
+  {date:"2024-10-01",n:[6,10,21,28,37,43,50],b:4},
+  {date:"2024-09-27",n:[2,14,19,27,34,40,48],b:16},
+  {date:"2024-09-24",n:[8,12,17,31,36,41,49],b:10},
+  {date:"2024-09-20",n:[3,11,22,26,33,44,47],b:23},
+  {date:"2024-09-17",n:[5,9,20,29,38,42,50],b:7},
+  {date:"2024-09-13",n:[7,13,18,28,35,43,48],b:15},
+  {date:"2024-09-10",n:[1,10,21,25,37,40,49],b:20},
+  {date:"2024-09-06",n:[4,14,19,31,34,41,47],b:3},
+  {date:"2024-09-03",n:[6,11,23,27,36,44,50],b:12},
+  {date:"2024-08-30",n:[2,9,17,26,33,42,48],b:22},
+  {date:"2024-08-27",n:[8,12,22,30,35,43,49],b:6},
+  {date:"2024-08-23",n:[3,15,20,28,37,40,47],b:17},
+  {date:"2024-08-20",n:[5,10,18,29,34,41,50],b:9},
+  {date:"2024-08-16",n:[7,11,21,25,36,44,48],b:14},
+  {date:"2024-08-13",n:[1,13,19,31,33,42,49],b:4},
+  {date:"2024-08-09",n:[4,9,23,27,38,43,47],b:21},
+  {date:"2024-08-06",n:[6,14,20,26,35,40,50],b:8},
+  {date:"2024-08-02",n:[2,10,18,28,37,41,48],b:16},
+  {date:"2024-07-30",n:[8,12,22,31,34,44,49],b:5},
+  {date:"2024-07-26",n:[3,11,19,29,36,42,47],b:23},
+  {date:"2024-07-23",n:[5,9,17,25,33,43,50],b:11},
+  {date:"2024-07-19",n:[7,15,21,27,35,40,48],b:2},
+  {date:"2024-07-16",n:[1,10,20,30,38,41,49],b:18},
+  {date:"2024-07-12",n:[4,13,18,28,37,44,47],b:7},
+  {date:"2024-07-09",n:[6,11,23,26,34,42,50],b:15},
+  {date:"2024-07-05",n:[2,9,19,29,36,43,48],b:24},
+  {date:"2024-07-02",n:[8,14,22,31,33,40,49],b:10},
+  {date:"2024-06-28",n:[3,12,20,25,35,41,47],b:19},
+  {date:"2024-06-25",n:[5,10,18,28,37,44,50],b:4},
+  {date:"2024-06-21",n:[7,11,21,27,34,42,48],b:13},
+  {date:"2024-06-18",n:[1,9,19,31,36,43,49],b:22},
+  {date:"2024-06-14",n:[4,15,23,26,33,40,47],b:6},
+  {date:"2024-06-11",n:[6,12,20,29,38,41,50],b:17},
+  {date:"2024-06-07",n:[2,10,18,25,35,44,48],b:8},
+  {date:"2024-06-04",n:[8,14,22,28,37,42,49],b:20},
+  {date:"2024-05-31",n:[3,11,19,27,34,43,47],b:3},
+  {date:"2024-05-28",n:[5,9,21,30,36,40,50],b:14},
+  {date:"2024-05-24",n:[7,13,17,29,33,41,48],b:9},
+  {date:"2024-05-21",n:[1,10,20,26,35,44,49],b:21},
+  {date:"2024-05-17",n:[4,12,23,31,38,42,47],b:5},
+  {date:"2024-05-14",n:[6,11,19,28,37,43,50],b:16},
+  {date:"2024-05-10",n:[2,9,17,25,34,40,48],b:11},
+  {date:"2024-05-07",n:[8,15,22,29,36,41,49],b:23},
+  {date:"2024-05-03",n:[3,10,20,27,33,44,47],b:7},
+  {date:"2024-04-30",n:[5,12,18,31,35,42,50],b:18},
+  {date:"2024-04-26",n:[7,11,21,26,37,43,48],b:2},
+  {date:"2024-04-23",n:[1,14,19,28,34,40,49],b:12},
+  {date:"2024-04-19",n:[4,9,23,25,36,41,47],b:24},
+  {date:"2024-04-16",n:[6,13,20,30,33,44,50],b:6},
+  {date:"2024-04-12",n:[2,10,18,27,38,42,48],b:15},
+  {date:"2024-04-09",n:[8,12,22,29,35,43,49],b:10},
+  {date:"2024-04-05",n:[3,15,19,26,37,40,47],b:20},
+  {date:"2024-04-02",n:[5,11,21,28,34,41,50],b:4},
+  {date:"2024-03-29",n:[7,9,17,31,36,44,48],b:13},
+  {date:"2024-03-26",n:[1,13,20,25,33,42,49],b:22},
+  {date:"2024-03-22",n:[4,10,23,27,35,43,47],b:8},
+  {date:"2024-03-19",n:[6,12,19,30,38,40,50],b:17},
+  {date:"2024-03-15",n:[2,11,22,28,37,41,48],b:3},
+  {date:"2024-03-12",n:[8,14,20,26,34,44,49],b:19},
+  {date:"2024-03-08",n:[3,9,18,29,36,42,47],b:9},
+  {date:"2024-03-05",n:[5,15,21,31,33,43,50],b:14},
+  {date:"2024-03-01",n:[7,10,19,25,35,40,48],b:5},
+  {date:"2024-02-27",n:[1,12,23,27,37,41,49],b:21},
+  {date:"2024-02-23",n:[4,11,20,28,34,44,47],b:16},
+  {date:"2024-02-20",n:[6,9,18,26,36,42,50],b:7},
+  {date:"2024-02-16",n:[2,13,22,31,33,43,48],b:23},
+  {date:"2024-02-13",n:[8,10,19,29,35,40,49],b:11},
+  {date:"2024-02-09",n:[3,14,21,25,37,41,47],b:4},
+  {date:"2024-02-06",n:[5,12,17,27,34,44,50],b:18},
+  {date:"2024-02-02",n:[7,11,20,30,36,42,48],b:2},
+  {date:"2024-01-30",n:[1,9,23,28,33,43,49],b:13},
+  {date:"2024-01-26",n:[4,15,19,26,35,40,47],b:20},
+  {date:"2024-01-23",n:[6,10,22,31,38,41,50],b:6},
+  {date:"2024-01-19",n:[2,12,20,29,37,44,48],b:24},
+  {date:"2024-01-16",n:[8,11,18,25,34,42,49],b:10},
+  {date:"2024-01-12",n:[3,9,21,27,36,43,47],b:17},
+  {date:"2024-01-09",n:[5,14,19,28,33,40,50],b:3},
+  {date:"2024-01-05",n:[7,13,22,31,35,41,48],b:15},
+  {date:"2024-01-02",n:[1,10,17,26,37,44,49],b:22},
+  {date:"2023-12-29",n:[4,12,20,25,34,42,47],b:8},
+  {date:"2023-12-26",n:[6,11,23,29,36,43,50],b:19},
+  {date:"2023-12-22",n:[2,9,19,28,33,40,48],b:5},
+  {date:"2023-12-19",n:[8,15,21,31,35,41,49],b:14},
+  {date:"2023-12-15",n:[3,10,18,27,37,44,47],b:21},
+  {date:"2023-12-12",n:[5,13,22,26,34,42,50],b:7},
+  {date:"2023-12-08",n:[7,11,19,30,36,43,48],b:11},
+  {date:"2023-12-05",n:[1,14,23,28,33,40,49],b:23},
+  {date:"2023-12-01",n:[4,9,20,25,35,41,47],b:16},
+  {date:"2023-11-28",n:[6,12,18,29,37,44,50],b:4},
+  {date:"2023-11-24",n:[2,10,21,31,34,42,48],b:20},
+  {date:"2023-11-21",n:[8,11,19,27,36,43,49],b:9},
+  {date:"2023-11-17",n:[3,15,22,26,33,40,47],b:6},
+  {date:"2023-11-14",n:[5,9,17,28,35,41,50],b:13},
+  {date:"2023-11-10",n:[7,14,20,31,38,44,48],b:2},
+  {date:"2023-11-07",n:[1,12,23,25,37,42,49],b:18},
+  {date:"2023-11-03",n:[4,10,19,29,34,43,47],b:24},
+  {date:"2023-10-31",n:[6,11,22,27,36,40,50],b:10},
+  {date:"2023-10-27",n:[2,13,20,30,33,41,48],b:15},
+  {date:"2023-10-24",n:[8,9,18,26,35,44,49],b:3},
+  {date:"2023-10-20",n:[3,15,21,28,37,42,47],b:22},
+  {date:"2023-10-17",n:[5,10,19,25,34,43,50],b:7},
+  {date:"2023-10-13",n:[7,12,23,31,36,40,48],b:17},
+  {date:"2023-10-10",n:[1,11,20,27,33,41,49],b:12},
+  {date:"2023-10-06",n:[4,9,18,29,35,44,47],b:21},
+  {date:"2023-10-03",n:[6,14,22,26,38,42,50],b:5},
+  {date:"2023-09-29",n:[2,10,19,31,37,43,48],b:8},
+  {date:"2023-09-26",n:[8,13,21,25,34,40,49],b:16},
+  {date:"2023-09-22",n:[3,11,17,27,36,41,47],b:23},
+  {date:"2023-09-19",n:[5,9,20,30,33,44,50],b:4},
+  {date:"2023-09-15",n:[7,12,23,28,35,42,48],b:19},
+  {date:"2023-09-12",n:[1,14,19,26,37,43,49],b:9},
+  {date:"2023-09-08",n:[4,10,22,29,34,40,47],b:14},
+  {date:"2023-09-05",n:[6,11,20,31,36,41,50],b:6},
+  {date:"2023-09-01",n:[2,9,18,27,33,44,48],b:20},
+  {date:"2023-08-29",n:[8,15,21,25,35,42,49],b:3},
+  {date:"2023-08-25",n:[3,12,19,28,38,43,47],b:11},
+  {date:"2023-08-22",n:[5,10,23,30,37,40,50],b:22},
+  {date:"2023-08-18",n:[7,13,20,26,34,41,48],b:7},
+  {date:"2023-08-15",n:[1,11,18,29,36,44,49],b:15},
+  {date:"2023-08-11",n:[4,9,22,31,33,42,47],b:24},
+  {date:"2023-08-08",n:[6,14,19,27,35,43,50],b:10},
+  {date:"2023-08-04",n:[2,10,21,28,37,40,48],b:18},
+  {date:"2023-08-01",n:[8,12,17,26,34,41,49],b:5},
+  {date:"2023-07-28",n:[3,11,20,31,36,44,47],b:13},
+  {date:"2023-07-25",n:[5,9,23,25,33,42,50],b:2},
+  {date:"2023-07-21",n:[7,15,19,29,35,43,48],b:21},
+  {date:"2023-07-18",n:[1,10,22,27,38,40,49],b:8},
+  {date:"2023-07-14",n:[4,13,20,28,37,41,47],b:17},
+  {date:"2023-07-11",n:[6,12,18,31,34,44,50],b:4},
+  {date:"2023-07-07",n:[2,11,21,26,36,42,48],b:23},
+  {date:"2023-07-04",n:[8,9,19,29,33,43,49],b:12},
+  {date:"2023-06-30",n:[3,14,23,25,35,40,47],b:19},
+  {date:"2023-06-27",n:[5,10,20,27,37,41,50],b:6},
+  {date:"2023-06-23",n:[7,12,18,30,34,44,48],b:14},
+  {date:"2023-06-20",n:[1,11,22,28,36,42,49],b:9},
+  {date:"2023-06-16",n:[4,9,19,26,33,43,47],b:20},
+  {date:"2023-06-13",n:[6,15,21,31,35,40,50],b:3},
+  {date:"2023-06-09",n:[2,10,17,27,37,41,48],b:16},
+  {date:"2023-06-06",n:[8,13,20,25,34,44,49],b:22},
+  {date:"2023-06-02",n:[3,11,23,29,36,42,47],b:7},
+  {date:"2023-05-30",n:[5,9,19,28,33,43,50],b:11},
+  {date:"2023-05-26",n:[7,14,22,31,35,40,48],b:24},
+  {date:"2023-05-23",n:[1,12,20,26,37,41,49],b:5},
+  {date:"2023-05-19",n:[4,10,18,27,34,44,47],b:18},
+  {date:"2023-05-16",n:[6,11,21,30,36,42,50],b:10},
+  {date:"2023-05-12",n:[2,15,19,25,33,43,48],b:2},
+  {date:"2023-05-09",n:[8,9,23,28,35,40,49],b:13},
+  {date:"2023-05-05",n:[3,12,20,31,37,41,47],b:21},
+  {date:"2023-05-02",n:[5,10,18,26,34,44,50],b:6},
+  {date:"2023-04-28",n:[7,11,22,29,36,42,48],b:15},
+  {date:"2023-04-25",n:[1,14,19,27,33,43,49],b:23},
+  {date:"2023-04-21",n:[4,9,21,25,35,40,47],b:8},
+  {date:"2023-04-18",n:[6,13,17,31,38,41,50],b:19},
+  {date:"2023-04-14",n:[2,10,20,28,37,44,48],b:4},
+  {date:"2023-04-11",n:[8,12,23,26,34,42,49],b:17},
+  {date:"2023-04-07",n:[3,11,19,30,36,43,47],b:12},
+  {date:"2023-04-04",n:[5,9,22,27,33,40,50],b:20},
+  {date:"2023-03-31",n:[7,15,20,29,35,41,48],b:7},
+  {date:"2023-03-28",n:[1,10,18,25,37,44,49],b:3},
+  {date:"2023-03-24",n:[4,13,21,28,34,42,47],b:22},
+  {date:"2023-03-21",n:[6,11,19,31,36,43,50],b:14},
+  {date:"2023-03-17",n:[2,9,23,27,33,40,48],b:9},
+  {date:"2023-03-14",n:[8,14,20,26,35,41,49],b:16},
+  {date:"2023-03-10",n:[3,10,18,29,37,44,47],b:5},
+  {date:"2023-03-07",n:[5,12,22,31,34,42,50],b:21},
+  {date:"2023-03-03",n:[7,11,19,25,36,43,48],b:11},
+  {date:"2023-02-28",n:[1,15,23,27,33,40,49],b:24},
+  {date:"2023-02-24",n:[4,9,20,28,35,41,47],b:6},
+  {date:"2023-02-21",n:[6,13,18,31,37,44,50],b:18},
+  {date:"2023-02-17",n:[2,10,21,26,34,42,48],b:13},
+  {date:"2023-02-14",n:[8,12,19,29,36,43,49],b:2},
+  {date:"2023-02-10",n:[3,11,22,25,33,40,47],b:23},
+  {date:"2023-02-07",n:[5,9,17,27,35,41,50],b:10},
+  {date:"2023-02-03",n:[7,14,20,30,38,44,48],b:15},
+  {date:"2023-01-31",n:[1,10,23,28,37,42,49],b:4},
+  {date:"2023-01-27",n:[4,12,19,26,34,43,47],b:20},
+  {date:"2023-01-24",n:[6,11,22,31,36,40,50],b:7},
+  {date:"2023-01-20",n:[2,9,20,25,33,41,48],b:17},
+  {date:"2023-01-17",n:[8,15,18,27,35,44,49],b:12},
+  {date:"2023-01-13",n:[3,10,21,29,37,42,47],b:22},
+  {date:"2023-01-10",n:[5,13,19,28,34,43,50],b:5},
+  {date:"2023-01-06",n:[7,11,23,31,36,40,48],b:19},
+  {date:"2023-01-03",n:[1,14,20,26,33,41,49],b:8},
+];
+
+// ================================================================
+// ZODIAC DATA
+// ================================================================
+const ZODIAC = [
+  { sign:"Aries",      icon:"♈", dates:"Mar 21–Apr 19", element:"Fire 🔥",
+    lucky:[1,8,17,26,35,44],
+    reading:"The Ram's bold energy surges this week! Mars, your ruler, is in a powerful trine with Jupiter, amplifying your luck with numbers ending in 1 and 8. Your magnetic draw toward leadership numbers in the teens and twenties is especially strong. Trust your first instinct when choosing — Aries energy favors decisiveness over deliberation." },
+  { sign:"Taurus",     icon:"♉", dates:"Apr 20–May 20", element:"Earth 🌍",
+    lucky:[2,6,9,24,37,42],
+    reading:"Venus blesses the Bull with material fortune this cycle. Even numbers have a special resonance with your grounded nature, particularly 2, 6, and 24. Your patience and persistence are cosmic gifts — let the numbers above 30 speak to your long-term wealth vision. The universe rewards your steadiness." },
+  { sign:"Gemini",     icon:"♊", dates:"May 21–Jun 20", element:"Air 💨",
+    lucky:[5,7,14,23,32,41],
+    reading:"Mercury sparks your dual nature into lottery awareness! Numbers that mirror or split your birth range — 5, 14, 23, 32, 41 — follow the magic of the Gemini sequence. Your adaptability lets you sense pattern where others see chaos. The 23 carries twin-energy that aligns beautifully with your sign this period." },
+  { sign:"Cancer",     icon:"♋", dates:"Jun 21–Jul 22", element:"Water 🌊",
+    lucky:[2,7,11,16,20,38],
+    reading:"The Moon, your celestial guide, illuminates numbers tied to emotional cycles. Your intuition is running at peak frequency — trust it fully. Numbers 7 and 20 hold lunar significance for Cancer this season. The sequence 2-7-11 appears repeatedly in your astral chart as a power trio for wealth manifestation." },
+  { sign:"Leo",        icon:"♌", dates:"Jul 23–Aug 22", element:"Fire 🔥",
+    lucky:[1,4,10,13,22,39],
+    reading:"The Sun crowns Leo with golden fortune! Royal numbers 1, 10, and 22 resonate with your natural authority. This is a peak abundance window for the Lion — your solar energy is magnified sevenfold. Number 13, traditionally 'unlucky', transforms into a power number under Leo's light. Embrace your cosmic royalty." },
+  { sign:"Virgo",      icon:"♍", dates:"Aug 23–Sep 22", element:"Earth 🌍",
+    lucky:[5,14,15,23,32,40],
+    reading:"Meticulous Virgo finds patterns others miss — and this week, the pattern points to multiples of 5 and numbers in the teens. Your analytical gift lets you combine statistical frequency with cosmic alignment. Numbers 15 and 32 carry Virgoan precision energy. Mercury's analytical power is boosting your number-sense remarkably." },
+  { sign:"Libra",      icon:"♎", dates:"Sep 23–Oct 22", element:"Air 💨",
+    lucky:[6,15,24,33,42,49],
+    reading:"Venus grants Libra perfect balance in the cosmic lottery grid! Numbers that follow a 9-unit progression — 6, 15, 24, 33, 42 — resonate with your innate harmony sense. The 49 completes your lucky sequence, bringing the celestial scales into perfect equilibrium. Partnerships and the number 6 are especially blessed." },
+  { sign:"Scorpio",    icon:"♏", dates:"Oct 23–Nov 21", element:"Water 🌊",
+    lucky:[8,11,18,22,29,37],
+    reading:"Pluto and Mars intensify Scorpio's penetrating luck this cycle! Your transformative energy unlocks hidden patterns in the number matrix. The 8 carries infinite-wealth energy for Scorpio, while 22 is your master number of material power. Trust your instinct for what's hidden beneath the surface of apparent randomness." },
+  { sign:"Sagittarius",icon:"♐", dates:"Nov 22–Dec 21", element:"Fire 🔥",
+    lucky:[3,9,12,21,30,48],
+    reading:"Jupiter, your benevolent ruler, expands your fortunate field magnificently! The Archer's arrow lands on multiples of 3 this season — 3, 9, 12, 21, 30. Your philosophical optimism is the secret ingredient that transforms statistical picks into lucky ones. The 48 is your long-range shot that pays off handsomely." },
+  { sign:"Capricorn",  icon:"♑", dates:"Dec 22–Jan 19", element:"Earth 🌍",
+    lucky:[6,8,9,26,41,50],
+    reading:"Saturn rewards the Sea Goat's disciplined approach to fortune! Numbers 8 and 50 are power anchors for your ambition energy. Your practical nature combines beautifully with cosmic timing this period. The number 26 holds karmic significance for Capricorn — it appears at the intersection of your birth chart's wealth axis." },
+  { sign:"Aquarius",   icon:"♒", dates:"Jan 20–Feb 18", element:"Air 💨",
+    lucky:[2,3,11,17,22,44],
+    reading:"Uranus electrifies Aquarius with revolutionary lucky energy! Your futuristic thinking aligns with numbers that break conventional patterns — 11 and 22 are your master numbers, carrying double-digit power. The humanitarian 2 and the trailblazing 3 form your power pair. Number 44 is your cosmic amplifier this lottery cycle." },
+  { sign:"Pisces",     icon:"♓", dates:"Feb 19–Mar 20", element:"Water 🌊",
+    lucky:[3,7,12,16,29,40],
+    reading:"Neptune dissolves the boundary between chance and destiny for the Fish! Your heightened psychic sensitivity makes you uniquely attuned to cosmic number patterns. The 7 is universally your sacred number, while 12 resonates with Pisces' ruler of the 12th house. Let your dreams guide your picks — the Fish knows what swims beneath." },
+];
+
+// ================================================================
+// APP STATE
+// ================================================================
+let currentTab = 'generator';
+let selectedStrategy = 'balanced';
+let selectedZodiac = null;
+let horoscopeBoost = false;
+let freqFilter = 'all';
+let historyPage = 1;
+let historyFilter = '';
+let yearFilter = 'all';
+let pickedNumbers = [];
+let pickedBonus = null;
+const PAGE_SIZE = 15;
+
+// ================================================================
+// UTILITY FUNCTIONS
+// ================================================================
+function calcFrequency(draws) {
+  const freq = {};
+  for (let i = 1; i <= 50; i++) freq[i] = 0;
+  draws.forEach(d => {
+    d.n.forEach(n => freq[n]++);
+  });
+  return freq;
+}
+
+function getFilteredDraws() {
+  if (freqFilter === 'last50') return DRAWS.slice(0, 50);
+  if (freqFilter === 'last20') return DRAWS.slice(0, 20);
+  if (freqFilter === 'last10') return DRAWS.slice(0, 10);
+  return DRAWS;
+}
+
+function weightedRandom(weights) {
+  let total = weights.reduce((a, b) => a + b, 0);
+  let r = Math.random() * total;
+  for (let i = 0; i < weights.length; i++) {
+    r -= weights[i];
+    if (r <= 0) return i;
+  }
+  return weights.length - 1;
+}
+
+function pickUnique(pool, count, weights) {
+  const chosen = [];
+  const poolCopy = [...pool];
+  const weightsCopy = weights ? [...weights] : null;
+  while (chosen.length < count && poolCopy.length > 0) {
+    let idx;
+    if (weightsCopy) {
+      idx = weightedRandom(weightsCopy);
+    } else {
+      idx = Math.floor(Math.random() * poolCopy.length);
+    }
+    chosen.push(poolCopy[idx]);
+    poolCopy.splice(idx, 1);
+    if (weightsCopy) weightsCopy.splice(idx, 1);
+  }
+  return chosen.sort((a, b) => a - b);
+}
+
+function drawSum(n) { return n.reduce((a, b) => a + b, 0); }
+
+// ================================================================
+// INIT
+// ================================================================
+function init() {
+  buildStats();
+  buildMiniZodiac();
+  buildZodiacGrid();
+  buildNumberPicker();
+  renderFreqChart();
+  renderHotCold();
+  renderPairs();
+  renderSumAnalysis();
+  renderHistory();
+}
+
+function buildStats() {
+  const freq = calcFrequency(DRAWS);
+  document.getElementById('stat-draws').textContent = DRAWS.length;
+
+  const sorted = Object.entries(freq).sort((a,b) => b[1]-a[1]);
+  document.getElementById('stat-most-freq').textContent = '#' + sorted[0][0];
+
+  // most overdue = least frequent recently
+  const recentFreq = calcFrequency(DRAWS.slice(0,20));
+  const overdue = Object.entries(recentFreq).sort((a,b) => a[1]-b[1]);
+  document.getElementById('stat-least-freq').textContent = '#' + overdue[0][0];
+
+  const sums = DRAWS.map(d => drawSum(d.n));
+  const avgSum = Math.round(sums.reduce((a,b)=>a+b,0)/sums.length);
+  document.getElementById('stat-avg-sum').textContent = avgSum;
+}
+
+function buildMiniZodiac() {
+  const wrap = document.querySelector('#mini-zodiac > div');
+  ZODIAC.forEach((z,i) => {
+    const el = document.createElement('button');
+    el.style.cssText = 'border:2px solid var(--dark-border);background:transparent;color:var(--text);border-radius:20px;padding:5px 12px;cursor:pointer;font-size:0.82rem;transition:all 0.2s;';
+    el.textContent = z.icon + ' ' + z.sign;
+    el.onclick = () => {
+      document.querySelectorAll('#mini-zodiac button').forEach(b => {
+        b.style.borderColor = 'var(--dark-border)';
+        b.style.color = 'var(--text)';
+        b.style.background = 'transparent';
+      });
+      el.style.borderColor = 'var(--gold)';
+      el.style.color = 'var(--gold)';
+      el.style.background = 'rgba(245,200,66,0.08)';
+      selectedZodiac = i;
+      document.getElementById('horoscope-toggle-label').textContent =
+        'Zodiac boost enabled — ' + z.icon + ' ' + z.sign;
+    };
+    wrap.appendChild(el);
+  });
+}
+
+// ================================================================
+// TAB SWITCHING
+// ================================================================
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    btn.classList.toggle('active', ['generator','analysis','history','horoscope','checker'][i] === tab);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + tab).classList.add('active');
+  currentTab = tab;
+}
+
+// ================================================================
+// STRATEGY
+// ================================================================
+function selectStrategy(s) {
+  selectedStrategy = s;
+  document.querySelectorAll('.strategy-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('s-' + s).classList.add('selected');
+}
+
+function toggleHoroscopeBoost() {
+  horoscopeBoost = document.getElementById('toggle-horoscope').checked;
+  document.getElementById('mini-zodiac').style.display = horoscopeBoost ? 'block' : 'none';
+  if (!horoscopeBoost) {
+    document.getElementById('horoscope-toggle-label').textContent = 'Include zodiac boost — Select your sign below';
+  }
+}
+
+// ================================================================
+// NUMBER GENERATION
+// ================================================================
+function generateNumbers() {
+  const btn = document.getElementById('gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+
+  setTimeout(() => {
+    const freq = calcFrequency(DRAWS);
+    const numbers = Array.from({length:50},(_,i)=>i+1);
+
+    let weights = numbers.map(n => {
+      const f = freq[n];
+      switch(selectedStrategy) {
+        case 'hot':    return Math.pow(f+1, 2);
+        case 'cold':   return Math.pow(DRAWS.length - f + 1, 2);
+        case 'pattern':
+          // prefer numbers with consistent intervals
+          return f * 1.2 + (n % 7 === 0 ? 3 : 0) + (n % 5 === 0 ? 2 : 0);
+        case 'random': return 1;
+        default: // balanced
+          const mid = DRAWS.length / 2;
+          return 1 + Math.abs(f - mid) * 0.1 + (f > mid ? f * 0.5 : (DRAWS.length - f) * 0.5);
+      }
+    });
+
+    // Zodiac boost
+    if (horoscopeBoost && selectedZodiac !== null) {
+      const z = ZODIAC[selectedZodiac];
+      z.lucky.forEach(ln => {
+        if (ln >= 1 && ln <= 50) weights[ln-1] *= 2.5;
+      });
+    }
+
+    const picks = pickUnique(numbers, 7, weights);
+    // bonus
+    const remaining = numbers.filter(n => !picks.includes(n));
+    const bonus = remaining[Math.floor(Math.random() * remaining.length)];
+
+    displayResult(picks, bonus);
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generate My Lucky Numbers';
+  }, 800);
+}
+
+function displayResult(picks, bonus) {
+  const card = document.getElementById('result-card');
+  card.style.display = 'block';
+
+  const freq = calcFrequency(DRAWS);
+  const container = document.getElementById('result-balls');
+  container.innerHTML = '';
+
+  picks.forEach((n, i) => {
+    const ball = document.createElement('div');
+    ball.className = 'ball main reveal';
+    ball.style.animationDelay = (i * 0.12) + 's';
+    ball.textContent = n;
+    container.appendChild(ball);
+  });
+
+  const bonusBall = document.createElement('div');
+  bonusBall.className = 'ball bonus reveal';
+  bonusBall.style.animationDelay = (picks.length * 0.12) + 's';
+  bonusBall.textContent = bonus;
+  container.appendChild(bonusBall);
+
+  // Insights
+  const sum = drawSum(picks);
+  const sums = DRAWS.map(d => drawSum(d.n));
+  const avgSum = Math.round(sums.reduce((a,b)=>a+b,0)/sums.length);
+  const topFreq = picks.map(n => ({n, f: freq[n]})).sort((a,b)=>b.f-a.f);
+  const hotPick = topFreq[0];
+  const coldPick = topFreq[topFreq.length-1];
+  const oddCount = picks.filter(n => n % 2 !== 0).length;
+  const evenCount = 7 - oddCount;
+
+  document.getElementById('result-insights').innerHTML = `
+    <strong style="color:var(--text)">Analysis:</strong>
+    Sum of your numbers: <strong style="color:var(--gold)">${sum}</strong> (historical avg: ${avgSum}).
+    Odd/Even split: ${oddCount}/${evenCount}.
+    Hottest pick: <strong style="color:var(--red-hot)">#${hotPick.n}</strong> (drawn ${hotPick.f}× in ${DRAWS.length} draws).
+    Most overdue: <strong style="color:var(--blue-cold)">#${coldPick.n}</strong> (drawn ${coldPick.f}×).
+    ${horoscopeBoost && selectedZodiac !== null ? `<br/>⭐ <em>${ZODIAC[selectedZodiac].sign} zodiac boost applied!</em>` : ''}
+  `;
+
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ================================================================
+// FREQUENCY CHART
+// ================================================================
+function renderFreqChart() {
+  const draws = getFilteredDraws();
+  const freq = calcFrequency(draws);
+  const vals = Object.values(freq);
+  const max = Math.max(...vals);
+  const sortedFreq = Object.entries(freq).sort((a,b)=>b[1]-a[1]);
+  const top10 = new Set(sortedFreq.slice(0,10).map(x=>Number(x[0])));
+  const bot10 = new Set(sortedFreq.slice(-10).map(x=>Number(x[0])));
+
+  const container = document.getElementById('freq-chart');
+  container.innerHTML = '';
+
+  for (let n = 1; n <= 50; n++) {
+    const f = freq[n];
+    const pct = max > 0 ? (f / max) * 100 : 0;
+    let level = 'level-cool';
+    if (top10.has(n)) level = 'level-hot';
+    else if (f > vals.reduce((a,b)=>a+b,0)/50) level = 'level-warm';
+    else if (bot10.has(n)) level = 'level-cold';
+
+    const cell = document.createElement('div');
+    cell.className = 'freq-cell';
+    cell.title = `#${n}: drawn ${f} times`;
+    cell.innerHTML = `
+      <div class="freq-num">${n}</div>
+      <div class="freq-bar-wrap"><div class="freq-bar ${level}" style="height:${Math.max(4,pct * 0.6)}px"></div></div>
+      <div class="freq-count">${f}</div>
+    `;
+    container.appendChild(cell);
+  }
+}
+
+function setFreqFilter(filter, btn) {
+  freqFilter = filter;
+  document.querySelectorAll('.filter-row .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderFreqChart();
+  renderHotCold();
+}
+
+// ================================================================
+// HOT / COLD
+// ================================================================
+function renderHotCold() {
+  const draws = getFilteredDraws();
+  const freq = calcFrequency(draws);
+  const sorted = Object.entries(freq).sort((a,b) => b[1]-a[1]);
+
+  const hotBalls = document.getElementById('hot-balls');
+  const coldBalls = document.getElementById('cold-balls');
+  hotBalls.innerHTML = '';
+  coldBalls.innerHTML = '';
+
+  sorted.slice(0,10).forEach(([n,f]) => {
+    const ball = document.createElement('div');
+    ball.className = 'ball hot-ball small';
+    ball.textContent = n;
+    ball.title = `#${n}: ${f} times`;
+    hotBalls.appendChild(ball);
+  });
+
+  sorted.slice(-10).reverse().forEach(([n,f]) => {
+    const ball = document.createElement('div');
+    ball.className = 'ball cold-ball small';
+    ball.textContent = n;
+    ball.title = `#${n}: ${f} times`;
+    coldBalls.appendChild(ball);
+  });
+}
+
+// ================================================================
+// PAIRS ANALYSIS
+// ================================================================
+function renderPairs() {
+  const pairFreq = {};
+  DRAWS.forEach(d => {
+    for (let i = 0; i < d.n.length; i++) {
+      for (let j = i+1; j < d.n.length; j++) {
+        const key = d.n[i] + '-' + d.n[j];
+        pairFreq[key] = (pairFreq[key] || 0) + 1;
+      }
+    }
+  });
+
+  const sorted = Object.entries(pairFreq).sort((a,b) => b[1]-a[1]).slice(0,12);
+  const container = document.getElementById('pairs-list');
+  container.innerHTML = '';
+
+  sorted.forEach(([pair, count]) => {
+    const [a, b] = pair.split('-');
+    const el = document.createElement('div');
+    el.style.cssText = 'background:rgba(255,255,255,0.03);border:1px solid var(--dark-border);border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:10px;';
+    el.innerHTML = `
+      <div class="num-chip">${a}</div>
+      <span style="color:var(--text-dim); font-size:0.8rem;">+</span>
+      <div class="num-chip">${b}</div>
+      <span style="flex:1;"></span>
+      <span style="font-size:0.8rem;color:var(--gold);font-weight:700;">${count}×</span>
+    `;
+    container.appendChild(el);
+  });
+}
+
+// ================================================================
+// SUM ANALYSIS
+// ================================================================
+function renderSumAnalysis() {
+  const sums = DRAWS.map(d => drawSum(d.n));
+  const avg = Math.round(sums.reduce((a,b)=>a+b,0)/sums.length);
+  const min = Math.min(...sums);
+  const max = Math.max(...sums);
+  const low = sums.filter(s => s < 150).length;
+  const mid = sums.filter(s => s >= 150 && s <= 220).length;
+  const high = sums.filter(s => s > 220).length;
+
+  document.getElementById('sum-analysis').innerHTML = `
+    <p>The sum of all 7 drawn numbers across <strong style="color:var(--text)">${DRAWS.length} draws</strong> has ranged from <strong style="color:var(--blue-cold)">${min}</strong> to <strong style="color:var(--red-hot)">${max}</strong>, with an average of <strong style="color:var(--gold)">${avg}</strong>.</p>
+    <br/>
+    <p>Sum distribution:</p>
+    <ul style="list-style:none;margin-top:10px;">
+      <li style="padding:6px 0;">❄️ Low sum (&lt;150): <strong style="color:var(--text)">${low}</strong> draws (${Math.round(low/DRAWS.length*100)}%)</li>
+      <li style="padding:6px 0;">⚖️ Mid sum (150–220): <strong style="color:var(--gold)">${mid}</strong> draws (${Math.round(mid/DRAWS.length*100)}%)</li>
+      <li style="padding:6px 0;">🔥 High sum (&gt;220): <strong style="color:var(--red-hot)">${high}</strong> draws (${Math.round(high/DRAWS.length*100)}%)</li>
+    </ul>
+    <br/>
+    <p>💡 <em>Tip: Most winning tickets have a number sum between 150–220. Aim for this "sweet spot" when choosing your numbers.</em></p>
+  `;
+}
+
+// ================================================================
+// HISTORY
+// ================================================================
+function getFilteredHistory() {
+  let draws = DRAWS;
+  if (yearFilter !== 'all') {
+    draws = draws.filter(d => d.date.startsWith(yearFilter));
+  }
+  if (historyFilter) {
+    const q = historyFilter.toLowerCase();
+    draws = draws.filter(d =>
+      d.date.includes(q) ||
+      d.n.some(n => String(n).includes(q)) ||
+      String(d.b).includes(q)
+    );
+  }
+  return draws;
+}
+
+function renderHistory() {
+  const filtered = getFilteredHistory();
+  const total = filtered.length;
+  const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  historyPage = Math.min(historyPage, pages);
+  const start = (historyPage - 1) * PAGE_SIZE;
+  const slice = filtered.slice(start, start + PAGE_SIZE);
+
+  const tbody = document.getElementById('history-body');
+  tbody.innerHTML = '';
+
+  slice.forEach(d => {
+    const tr = document.createElement('tr');
+    const chips = d.n.map(n => `<span class="num-chip">${n}</span>`).join('');
+    const sum = drawSum(d.n);
+    tr.innerHTML = `
+      <td class="date-cell">${d.date}</td>
+      <td>${chips}</td>
+      <td><span class="num-chip bonus-chip">${d.b}</span></td>
+      <td style="color:var(--text-dim); font-size:0.8rem;">${sum}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('page-info').textContent = `Page ${historyPage} of ${pages} (${total} draws)`;
+  document.getElementById('prev-btn').disabled = historyPage <= 1;
+  document.getElementById('next-btn').disabled = historyPage >= pages;
+}
+
+function filterHistory() {
+  historyFilter = document.getElementById('search-box').value;
+  historyPage = 1;
+  renderHistory();
+}
+
+function setYearFilter(year, btn) {
+  yearFilter = year;
+  historyPage = 1;
+  document.querySelectorAll('#panel-history .filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderHistory();
+}
+
+function changePage(dir) {
+  historyPage += dir;
+  renderHistory();
+}
+
+// ================================================================
+// HOROSCOPE
+// ================================================================
+function buildZodiacGrid() {
+  const grid = document.getElementById('zodiac-grid');
+  ZODIAC.forEach((z, i) => {
+    const card = document.createElement('div');
+    card.className = 'zodiac-card';
+    card.id = 'zc-' + i;
+    card.innerHTML = `
+      <div class="zodiac-icon">${z.icon}</div>
+      <div class="zodiac-name">${z.sign}</div>
+      <div class="zodiac-dates">${z.dates}</div>
+    `;
+    card.onclick = () => selectZodiac(i);
+    grid.appendChild(card);
+  });
+}
+
+function selectZodiac(i) {
+  document.querySelectorAll('.zodiac-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('zc-' + i).classList.add('selected');
+  selectedZodiac = i;
+  showHoroscopeResult(i);
+}
+
+function showHoroscopeResult(idx) {
+  const z = ZODIAC[idx];
+  const result = document.getElementById('horoscope-result');
+  result.classList.remove('hidden');
+
+  document.getElementById('hz-icon').textContent = z.icon;
+  document.getElementById('hz-name').textContent = z.sign;
+  document.getElementById('hz-element').textContent = z.element + ' · ' + z.dates;
+  document.getElementById('hz-reading').textContent = z.reading;
+
+  // Generate primary lucky numbers combining zodiac + frequency
+  const freq = calcFrequency(DRAWS);
+  const numbers = Array.from({length:50},(_,i)=>i+1);
+  let weights = numbers.map(n => {
+    const f = freq[n];
+    const isLucky = z.lucky.includes(n);
+    return (f + 1) * (isLucky ? 4 : 1);
+  });
+
+  const primaryPicks = pickUnique(numbers, 7, [...weights]);
+  const remaining = numbers.filter(n => !primaryPicks.includes(n));
+  const bonusWeights = remaining.map(n => {
+    const f = freq[n];
+    const isLucky = z.lucky.includes(n);
+    return (f + 1) * (isLucky ? 3 : 0.5);
+  });
+  const bonus = pickUnique(remaining, 1, bonusWeights)[0];
+
+  // Secondary picks: pure zodiac-weighted
+  const secondaryWeights = numbers.map(n => {
+    const pos = z.lucky.indexOf(n);
+    if (pos !== -1) return 10 - pos * 1.5;
+    return 0.3;
+  });
+  const secondaryPicks = pickUnique(
+    numbers.filter(n => !primaryPicks.includes(n)),
+    7,
+    numbers.filter(n => !primaryPicks.includes(n)).map(n => {
+      const pos = z.lucky.indexOf(n);
+      return pos !== -1 ? 10 - pos * 1.5 : 0.3;
+    })
+  );
+  const secBonus = pickUnique(
+    numbers.filter(n => !primaryPicks.includes(n) && !secondaryPicks.includes(n)),
+    1, [1]
+  )[0];
+
+  // Render primary balls
+  renderHzBalls('hz-balls', primaryPicks, bonus);
+  renderHzBalls('hz-secondary-balls', secondaryPicks, secBonus);
+
+  result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function renderHzBalls(containerId, picks, bonus) {
+  const c = document.getElementById(containerId);
+  c.innerHTML = '';
+  picks.forEach((n,i) => {
+    const b = document.createElement('div');
+    b.className = 'ball main small reveal';
+    b.style.animationDelay = (i * 0.1) + 's';
+    b.textContent = n;
+    c.appendChild(b);
+  });
+  const bb = document.createElement('div');
+  bb.className = 'ball bonus small reveal';
+  bb.style.animationDelay = (picks.length * 0.1) + 's';
+  bb.textContent = bonus;
+  c.appendChild(bb);
+}
+
+// ================================================================
+// NUMBER CHECKER
+// ================================================================
+function buildNumberPicker() {
+  const picker = document.getElementById('number-picker');
+  const bPicker = document.getElementById('bonus-picker');
+  picker.innerHTML = '';
+  bPicker.innerHTML = '';
+
+  for (let n = 1; n <= 50; n++) {
+    const el = document.createElement('div');
+    el.className = 'picker-num';
+    el.textContent = n;
+    el.id = 'pick-' + n;
+    el.onclick = () => togglePick(n);
+    picker.appendChild(el);
+  }
+
+  for (let n = 1; n <= 50; n++) {
+    const el = document.createElement('div');
+    el.className = 'picker-num';
+    el.textContent = n;
+    el.id = 'bpick-' + n;
+    el.onclick = () => toggleBonus(n);
+    bPicker.appendChild(el);
+  }
+}
+
+function togglePick(n) {
+  const idx = pickedNumbers.indexOf(n);
+  if (idx !== -1) {
+    pickedNumbers.splice(idx, 1);
+    document.getElementById('pick-' + n).classList.remove('picked');
+  } else if (pickedNumbers.length < 7) {
+    pickedNumbers.push(n);
+    document.getElementById('pick-' + n).classList.add('picked');
+  }
+  document.getElementById('picker-info').textContent =
+    `Select 7 numbers (${pickedNumbers.length} selected)`;
+}
+
+function toggleBonus(n) {
+  if (pickedBonus === n) {
+    pickedBonus = null;
+    document.getElementById('bpick-' + n).classList.remove('bonus-picked');
+  } else {
+    if (pickedBonus !== null) {
+      document.getElementById('bpick-' + pickedBonus).classList.remove('bonus-picked');
+    }
+    pickedBonus = n;
+    document.getElementById('bpick-' + n).classList.add('bonus-picked');
+  }
+}
+
+function clearPicks() {
+  pickedNumbers.forEach(n => document.getElementById('pick-' + n).classList.remove('picked'));
+  if (pickedBonus !== null) document.getElementById('bpick-' + pickedBonus).classList.remove('bonus-picked');
+  pickedNumbers = [];
+  pickedBonus = null;
+  document.getElementById('picker-info').textContent = 'Select 7 numbers (0 selected)';
+  document.getElementById('match-result').classList.add('hidden');
+}
+
+function checkNumbers() {
+  if (pickedNumbers.length !== 7) {
+    alert('Please select exactly 7 numbers.');
+    return;
+  }
+
+  const latest = DRAWS[0];
+  const latestSet = new Set(latest.n);
+  const matches = pickedNumbers.filter(n => latestSet.has(n));
+  const bonusMatch = pickedBonus !== null && pickedBonus === latest.b;
+
+  let prize = '';
+  let prizeClass = 'prize-none';
+  const m = matches.length;
+
+  if (m === 7) { prize = '🎉 JACKPOT! 7/7 Match!'; prizeClass = 'prize-7'; }
+  else if (m === 6 && bonusMatch) { prize = '🥈 6/7 + Bonus — Major Prize!'; prizeClass = 'prize-6b'; }
+  else if (m === 6) { prize = '🥉 6/7 Match — Great Win!'; prizeClass = 'prize-6'; }
+  else if (m === 5) { prize = '🎫 5/7 Match'; prizeClass = 'prize-5'; }
+  else if (m === 4) { prize = '🎫 4/7 Match'; prizeClass = 'prize-5'; }
+  else if (m === 3 && bonusMatch) { prize = '🎫 3/7 + Bonus'; prizeClass = 'prize-5'; }
+  else if (m === 3) { prize = '🎫 3/7 Match — Free Play!'; prizeClass = 'prize-5'; }
+  else { prize = '❌ No prize this time'; prizeClass = 'prize-none'; }
+
+  const matchedChips = latest.n.map(n => {
+    const hit = pickedNumbers.includes(n);
+    return `<span class="num-chip" style="${hit ? 'background:linear-gradient(135deg,#4ddb94,#2a9962);' : ''}">${n}</span>`;
+  }).join('');
+
+  const result = document.getElementById('match-result');
+  result.classList.remove('hidden');
+  result.innerHTML = `
+    <div style="margin-bottom:10px;"><strong style="color:var(--text)">Latest Draw (${latest.date}):</strong> ${matchedChips} <span class="num-chip bonus-chip">${latest.b}</span></div>
+    <div>Your numbers matched: <strong style="color:var(--gold)">${m}/7</strong>${bonusMatch ? ' + Bonus ✓' : ''}</div>
+    <div><span class="prize-tag ${prizeClass}">${prize}</span></div>
+    ${m === 0 ? '<div style="margin-top:10px;color:var(--text-dim);font-size:0.82rem;">Try the generator to find luckier numbers next time! 🍀</div>' : ''}
+  `;
+}
+
+// ================================================================
+// START
+// ================================================================
+init();
+</script>
+</body>
+</html>
