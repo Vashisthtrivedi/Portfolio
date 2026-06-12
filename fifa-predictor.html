@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORACLE // FIFA 2026 Prediction Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#020617;--bg2:#0a1628;--bg3:#0f1f3d;
+  --acc:#8b5cf6;--acc2:#6d28d9;--cyan:#06b6d4;
+  --green:#22c55e;--amber:#f59e0b;--red:#ef4444;
+  --text:#f8fafc;--muted:#94a3b8;
+  --border:rgba(139,92,246,0.25);
+  --glow:0 0 20px rgba(139,92,246,0.35);
+}
+body{font-family:'Space Grotesk',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background:
+  radial-gradient(ellipse at 15% 15%,rgba(139,92,246,.1) 0%,transparent 55%),
+  radial-gradient(ellipse at 85% 85%,rgba(6,182,212,.07) 0%,transparent 55%),
+  radial-gradient(ellipse at 50% 50%,rgba(34,197,94,.04) 0%,transparent 70%);
+  animation:bgp 8s ease-in-out infinite alternate;pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.025) 2px,rgba(0,0,0,.025) 4px);pointer-events:none;z-index:0}
+@keyframes bgp{from{opacity:.7}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@keyframes shimmer{from{background-position:-300% center}to{background-position:300% center}}
+.container{max-width:1200px;margin:0 auto;padding:0 1rem;position:relative;z-index:1}
+/* Header */
+.hdr{padding:1.25rem 0;border-bottom:1px solid var(--border);background:rgba(2,6,23,.85);backdrop-filter:blur(14px);position:sticky;top:0;z-index:100}
+.hdr-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem}
+.logo{font-family:'JetBrains Mono',monospace;font-weight:700}
+.logo .o{color:var(--acc);font-size:1.3rem;letter-spacing:.08em}
+.logo .sub{color:var(--muted);font-size:.65rem;letter-spacing:.1em;margin-top:.15rem}
+.status-bar{display:flex;align-items:center;gap:.75rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;flex-wrap:wrap}
+.dot{width:7px;height:7px;border-radius:50%;animation:pulse 2s infinite}
+.dot.live{background:var(--green);box-shadow:0 0 7px var(--green)}
+.dot.warn{background:var(--amber);box-shadow:0 0 7px var(--amber)}
+/* Nav */
+.nav{display:flex;gap:.4rem;padding:.9rem 0;overflow-x:auto;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.ntab{padding:.55rem 1.1rem;border:1px solid var(--border);background:rgba(139,92,246,.04);color:var(--muted);border-radius:6px;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.7rem;font-weight:500;letter-spacing:.05em;transition:all .2s;white-space:nowrap}
+.ntab:hover,.ntab.active{border-color:var(--acc);color:var(--text);background:rgba(139,92,246,.12);box-shadow:var(--glow)}
+/* Card */
+.card{background:rgba(10,22,40,.72);border:1px solid var(--border);border-radius:10px;padding:1.2rem;backdrop-filter:blur(8px);transition:border-color .2s}
+.card:hover{border-color:rgba(139,92,246,.5)}
+.card-hdr{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.4rem}
+/* Risk badges */
+.rb{display:inline-flex;align-items:center;gap:.25rem;padding:.18rem .55rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.6rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.rb.low{background:rgba(34,197,94,.14);color:var(--green);border:1px solid rgba(34,197,94,.28)}
+.rb.med{background:rgba(245,158,11,.14);color:var(--amber);border:1px solid rgba(245,158,11,.28)}
+.rb.high{background:rgba(239,68,68,.14);color:var(--red);border:1px solid rgba(239,68,68,.28)}
+.rb.ext{background:rgba(239,68,68,.22);color:#ff7070;border:1px solid rgba(239,68,68,.45)}
+/* Prob bar */
+.pb-wrap{display:flex;height:26px;border-radius:6px;overflow:hidden;margin:.7rem 0;background:rgba(0,0,0,.25)}
+.pb{display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;transition:width 1s cubic-bezier(.4,0,.2,1)}
+.pb.win{background:linear-gradient(90deg,#1e40af,#3b82f6)}
+.pb.draw{background:linear-gradient(90deg,#374151,#6b7280)}
+.pb.loss{background:linear-gradient(90deg,#7f1d1d,#dc2626)}
+/* Match card */
+.mc{background:rgba(10,22,40,.72);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:.75rem;transition:all .2s;cursor:pointer}
+.mc:hover{border-color:var(--acc);background:rgba(139,92,246,.07);transform:translateY(-1px)}
+.ts{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+.tf{font-size:1.9rem;line-height:1}
+.tn{font-size:.82rem;font-weight:600;text-align:center}
+.tr{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)}
+.mc-mid{display:flex;flex-direction:column;align-items:center;gap:.2rem}
+.vs{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)}
+.score{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--cyan)}
+.mt{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)}
+.ms{font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:.12rem .35rem;border-radius:3px}
+.ms.live{background:rgba(239,68,68,.18);color:var(--red);animation:pulse 1.5s infinite}
+.ms.done{background:rgba(34,197,94,.14);color:var(--green)}
+.ms.next{background:rgba(139,92,246,.14);color:var(--acc)}
+/* Odds */
+.og{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin:.6rem 0}
+.oi{background:rgba(10,22,40,.6);border:1px solid var(--border);border-radius:7px;padding:.65rem;text-align:center}
+.ol{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.2rem}
+.ov{font-family:'JetBrains Mono',monospace;font-size:1.2rem;font-weight:700}
+.op{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-top:.15rem}
+/* Bet cards */
+.bc{border-radius:10px;padding:1rem 1.1rem;border-left:3px solid;animation:fadeUp .3s ease}
+.bc.low{background:rgba(34,197,94,.05);border-color:var(--green)}
+.bc.med{background:rgba(245,158,11,.05);border-color:var(--amber)}
+.bc.high{background:rgba(239,68,68,.05);border-color:var(--red)}
+.bc .bname{font-size:.875rem;font-weight:600;margin-bottom:.3rem}
+.bc .bdesc{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:.5rem}
+.chip{display:inline-block;padding:.12rem .45rem;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700}
+.chip.odds{background:rgba(6,182,212,.14);color:var(--cyan);border:1px solid rgba(6,182,212,.28)}
+.chip.val{background:rgba(34,197,94,.14);color:var(--green)}
+.chip.val-ok{background:rgba(245,158,11,.12);color:var(--amber)}
+.chip.val-poor{background:rgba(239,68,68,.12);color:var(--red)}
+/* Chat */
+.chat-wrap{height:calc(100vh - 270px);min-height:440px;display:flex;flex-direction:column;border-radius:10px;background:rgba(10,22,40,.72);border:1px solid var(--border)}
+.chat-top{padding:.75rem 1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.5rem;font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted)}
+.chat-msgs{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.85rem;scrollbar-width:thin;scrollbar-color:var(--border) transparent}
+.msg{display:flex;gap:.65rem;animation:fadeUp .3s ease}
+.msg.user{flex-direction:row-reverse}
+.avatar{width:30px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0}
+.av-oracle{background:linear-gradient(135deg,var(--acc2),var(--cyan))}
+.av-user{background:linear-gradient(135deg,#1e3a8a,#3b82f6)}
+.mbody{max-width:78%;padding:.7rem .9rem;border-radius:9px;font-size:.84rem;line-height:1.65}
+.mbody.oracle{background:rgba(15,31,61,.8);border:1px solid var(--border)}
+.mbody.user{background:rgba(109,40,217,.18);border:1px solid rgba(139,92,246,.35)}
+.mbody .rb{margin:.1rem .15rem 0}
+.qp-wrap{display:flex;flex-wrap:wrap;gap:.4rem;padding:.5rem 1rem .65rem}
+.qp{padding:.3rem .65rem;background:rgba(139,92,246,.07);border:1px solid rgba(139,92,246,.22);border-radius:16px;font-size:.72rem;color:var(--muted);cursor:pointer;transition:all .2s}
+.qp:hover{background:rgba(139,92,246,.16);color:var(--text);border-color:var(--acc)}
+.chat-input-row{padding:.9rem 1rem;border-top:1px solid var(--border);display:flex;gap:.65rem}
+.cinput{flex:1;background:rgba(10,22,40,.8);border:1px solid var(--border);border-radius:8px;padding:.65rem .9rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.84rem;outline:none;transition:border-color .2s}
+.cinput:focus{border-color:var(--acc)}
+.cinput::placeholder{color:var(--muted)}
+.bsend{padding:.65rem 1.1rem;background:linear-gradient(135deg,var(--acc2),var(--acc));border:none;border-radius:8px;color:#fff;cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;letter-spacing:.05em;transition:all .2s;white-space:nowrap}
+.bsend:hover{transform:translateY(-1px);box-shadow:0 4px 18px rgba(139,92,246,.5)}
+/* Typing */
+.typing{display:flex;gap:4px;align-items:center;padding:.25rem 0}
+.tdot{width:5px;height:5px;border-radius:50%;background:var(--acc);animation:typd 1.4s infinite}
+.tdot:nth-child(2){animation-delay:.22s}
+.tdot:nth-child(3){animation-delay:.44s}
+@keyframes typd{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+/* Team card */
+.tc{border-radius:10px;padding:1rem;background:rgba(10,22,40,.72);border:1px solid var(--border);transition:all .2s;cursor:default}
+.tc:hover{border-color:rgba(139,92,246,.5);transform:translateY(-2px)}
+.form-dot{display:inline-block;width:20px;height:20px;border-radius:4px;font-size:.6rem;font-weight:700;display:inline-flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace}
+.form-W{background:rgba(34,197,94,.18);color:var(--green)}
+.form-D{background:rgba(245,158,11,.15);color:var(--amber)}
+.form-L{background:rgba(239,68,68,.15);color:var(--red)}
+/* Stat rows */
+.sr{display:flex;align-items:center;gap:.6rem;padding:.4rem 0}
+.sl{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);width:90px;text-align:center;flex-shrink:0}
+.sbg{flex:1;height:5px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.sf{height:100%;border-radius:3px;transition:width 1.2s ease}
+.sv{font-family:'JetBrains Mono',monospace;font-size:.68rem;font-weight:700;width:30px;text-align:right;color:var(--cyan)}
+/* Grids */
+.g2{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:.8rem}
+.ga{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:.85rem}
+@media(max-width:768px){.g2,.g3{grid-template-columns:1fr}.mc{gap:.4rem}.tf{font-size:1.4rem}}
+/* Panel */
+.panel{display:none;padding:1.25rem 0}
+.panel.active{display:block}
+/* Section title */
+.st{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.85rem;display:flex;align-items:center;gap:.5rem}
+.st::after{content:'';flex:1;height:1px;background:var(--border)}
+/* Select */
+.sel{background:rgba(10,22,40,.8);border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;color:var(--text);font-family:'Space Grotesk',sans-serif;font-size:.84rem;outline:none;cursor:pointer;width:100%;transition:border-color .2s}
+.sel:focus{border-color:var(--acc)}
+/* Standings table */
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);text-align:left;padding:.45rem .65rem;border-bottom:1px solid var(--border);letter-spacing:.05em}
+.tbl td{padding:.55rem .65rem;border-bottom:1px solid rgba(139,92,246,.07)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(139,92,246,.04)}
+/* Scrollbar */
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+/* Colors */
+.acc{color:var(--acc)} .cy{color:var(--cyan)} .gr{color:var(--green)} .am{color:var(--amber)} .rd{color:var(--red)} .mu{color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+<div class="container">
+<div class="hdr-inner">
+  <div class="logo">
+    <div><span class="o">ORACLE</span><span class="mu"> // </span><span style="font-size:1rem;color:var(--text)">FIFA 2026</span></div>
+    <div class="sub">PREDICTION INTELLIGENCE · STATISTICAL ANALYSIS ENGINE</div>
+  </div>
+  <div class="status-bar">
+    <div class="dot live"></div><span class="gr">LIVE</span>
+    <span class="mu">|</span>
+    <span id="hdrDate" class="mu"></span>
+    <span class="mu">|</span>
+    <span class="am">GROUP STAGE · DAY 2</span>
+    <span class="mu">|</span>
+    <span style="color:var(--muted);font-size:.58rem">⚠ FOR INFORMATION ONLY</span>
+  </div>
+</div>
+</div>
+</header>
+
+<main>
+<div class="container">
+<nav class="nav">
+  <button class="ntab active" onclick="showPanel('dashboard')">◈ DASHBOARD</button>
+  <button class="ntab" onclick="showPanel('predictor')">⚡ PREDICTOR</button>
+  <button class="ntab" onclick="showPanel('betmatrix')">◎ BET MATRIX</button>
+  <button class="ntab" onclick="showPanel('teams')">◉ TEAM INTEL</button>
+  <button class="ntab" onclick="showPanel('chat')">◈ AI ANALYST</button>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="panel-dashboard" class="panel active">
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:.7rem;margin-bottom:1.4rem;">
+    <div class="card" style="text-align:center;padding:.9rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.3rem">STAGE</div><div style="font-weight:700;color:var(--amber);font-size:.95rem">GROUP STAGE</div><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted)">Day 2 of 12</div></div>
+    <div class="card" style="text-align:center;padding:.9rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.3rem">TODAY</div><div style="font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:var(--cyan)">8</div><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted)">matches</div></div>
+    <div class="card" style="text-align:center;padding:.9rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.3rem">TEAMS</div><div style="font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:var(--acc)">48</div><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted)">nations</div></div>
+    <div class="card" style="text-align:center;padding:.9rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.3rem">GOALS D1</div><div style="font-family:'JetBrains Mono',monospace;font-size:1.7rem;font-weight:700;color:var(--green)">13</div><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted)">scored</div></div>
+    <div class="card" style="text-align:center;padding:.9rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.3rem">TOP FAV</div><div style="font-size:.9rem;font-weight:700">🇦🇷 Argentina</div><div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--green)">3.1x · +208</div></div>
+    <div class="card" style="text-align:center;padding:.9rem"><div style="font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.3rem">HOT BET</div><div style="font-size:.78rem;font-weight:600;color:var(--amber)">Germany -1.5 AH</div><div class="rb low" style="margin-top:.3rem;font-size:.55rem">LOW RISK</div></div>
+  </div>
+  <div class="st">COMPLETED · JUNE 11 · DAY 1</div>
+  <div style="display:flex;flex-direction:column;gap:.65rem;margin-bottom:1.4rem" id="completedMatches"></div>
+  <div class="st">TODAY · JUNE 12 · DAY 2 — CLICK FOR PREDICTION</div>
+  <div style="display:flex;flex-direction:column;gap:.65rem" id="todayMatches"></div>
+</div>
+
+<!-- PREDICTOR -->
+<div id="panel-predictor" class="panel">
+  <div class="g2" style="margin-bottom:1.25rem">
+    <div class="card">
+      <div class="card-hdr">◈ CONFIGURE MATCH</div>
+      <div style="margin-bottom:.8rem"><div style="font-size:.72rem;color:var(--muted);margin-bottom:.3rem">TEAM A (Home / Favorite)</div><select class="sel" id="teamA" onchange="updatePrediction()"></select></div>
+      <div style="margin-bottom:.8rem"><div style="font-size:.72rem;color:var(--muted);margin-bottom:.3rem">TEAM B (Away / Underdog)</div><select class="sel" id="teamB" onchange="updatePrediction()"></select></div>
+      <div><div style="font-size:.72rem;color:var(--muted);margin-bottom:.3rem">CONTEXT</div>
+      <select class="sel" id="venueCtx" onchange="updatePrediction()">
+        <option value="neutral">Neutral (World Cup venue)</option>
+        <option value="homeA">Team A plays in home country</option>
+        <option value="homeB">Team B plays in home country</option>
+      </select></div>
+    </div>
+    <div class="card" id="predOut">
+      <div class="card-hdr">⚡ PREDICTION OUTPUT</div>
+      <div style="color:var(--muted);font-size:.84rem;text-align:center;padding:2rem 0;line-height:1.7">Select two different teams<br>to generate analysis</div>
+    </div>
+  </div>
+  <div id="betSugWrap" style="display:none">
+    <div class="st">RECOMMENDED BETS FOR THIS MATCH</div>
+    <div class="g3" id="betSugGrid"></div>
+  </div>
+  <div id="statsWrap" style="display:none;margin-top:1.25rem">
+    <div class="st">STATISTICAL HEAD-TO-HEAD</div>
+    <div class="card" id="statsBody"></div>
+  </div>
+</div>
+
+<!-- BET MATRIX -->
+<div id="panel-betmatrix" class="panel">
+  <div style="background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.22);border-radius:8px;padding:.8rem 1rem;margin-bottom:1.3rem;font-size:.78rem;color:var(--muted);line-height:1.6">
+    <span style="color:var(--amber);font-weight:600">⚠ DISCLAIMER:</span> ORACLE provides statistical probability modeling only — not financial advice. Betting involves real risk and loss. Must be legal age in your jurisdiction. Gamble responsibly. Always verify odds with licensed bookmakers.
+  </div>
+  <div class="st" style="color:var(--green)">◎ LOW RISK — HIGH CONFIDENCE PLAYS</div>
+  <div class="ga" id="lowBets" style="margin-bottom:1.3rem"></div>
+  <div class="st" style="color:var(--amber)">◎ MEDIUM RISK — CALCULATED VALUE BETS</div>
+  <div class="ga" id="medBets" style="margin-bottom:1.3rem"></div>
+  <div class="st" style="color:var(--red)">◎ HIGH RISK — UPSET & SPECIAL PLAYS</div>
+  <div class="ga" id="highBets"></div>
+</div>
+
+<!-- TEAM INTEL -->
+<div id="panel-teams" class="panel">
+  <div style="margin-bottom:1.2rem">
+    <input type="text" class="cinput" id="tsearch" placeholder="Search nation — Brazil, Germany, Japan, Morocco..." oninput="filterTeams()" style="width:100%">
+  </div>
+  <div class="ga" id="teamGrid"></div>
+</div>
+
+<!-- AI CHAT -->
+<div id="panel-chat" class="panel">
+  <div class="chat-wrap">
+    <div class="chat-top">
+      <div class="dot live"></div>
+      <span>ORACLE AI ANALYST</span>
+      <span class="mu">// FIFA 2026 INTELLIGENCE ENGINE</span>
+      <span style="margin-left:auto;color:var(--acc)">Elo-based · Statistical · Real-time</span>
+    </div>
+    <div class="chat-msgs" id="chatMsgs"></div>
+    <div class="qp-wrap" id="quickPs"></div>
+    <div class="chat-input-row">
+      <input type="text" class="cinput" id="chatIn" placeholder="Ask anything — odds, predictions, team analysis, bet advice..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="bsend" onclick="sendMsg()">ANALYSE ⟶</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+</main>
+
+<script>
+// ============================================================
+// DATA
+// ============================================================
+const T = {
+  USA:{n:"USA",f:"🇺🇸",conf:"CONCACAF",rank:13,elo:1875,form:["W","W","D","W","W"],grp:"A",kp:["C. Pulisic","W. McKennie","M. Turner"],coach:"G. Berhalter",style:"Athletic counter-press"},
+  PAN:{n:"Panama",f:"🇵🇦",conf:"CONCACAF",rank:41,elo:1590,form:["W","D","D","W","D"],grp:"A",kp:["R. Torres","A. Murillo","C. Young"],coach:"T. Christiansen",style:"Defensive & set-pieces"},
+  ALG:{n:"Algeria",f:"🇩🇿",conf:"CAF",rank:36,elo:1635,form:["W","D","W","W","D"],grp:"A",kp:["R. Mahrez","Y. Benrahma","I. Bennacer"],coach:"V. Petkovic",style:"Technical counter"},
+  MEX:{n:"Mexico",f:"🇲🇽",conf:"CONCACAF",rank:17,elo:1840,form:["D","W","W","D","W"],grp:"B",kp:["H. Lozano","R. Jiménez","A. Guardado"],coach:"J. Aguirre",style:"Compact technical"},
+  POL:{n:"Poland",f:"🇵🇱",conf:"UEFA",rank:24,elo:1765,form:["D","W","W","D","W"],grp:"B",kp:["R. Lewandowski","P. Zieliński","W. Szczęsny"],coach:"M. Probierz",style:"Physical counter"},
+  AUS:{n:"Australia",f:"🇦🇺",conf:"AFC",rank:28,elo:1760,form:["W","D","W","D","W"],grp:"B",kp:["M. Leckie","M. Irvine","A. Redmayne"],coach:"T. Popovic",style:"High energy press"},
+  CAN:{n:"Canada",f:"🇨🇦",conf:"CONCACAF",rank:29,elo:1825,form:["W","W","W","D","W"],grp:"C",kp:["A. Davies","J. David","C. Larin"],coach:"J. Herdman",style:"Counter-press"},
+  BEL:{n:"Belgium",f:"🇧🇪",conf:"UEFA",rank:9,elo:1955,form:["W","W","W","D","W"],grp:"C",kp:["K. De Bruyne","R. Lukaku","T. Courtois"],coach:"D. Tedesco",style:"Possession counter"},
+  MAR:{n:"Morocco",f:"🇲🇦",conf:"CAF",rank:12,elo:1920,form:["W","W","D","W","W"],grp:"C",kp:["H. Ziyech","Y. En-Nesyri","A. Ounahi"],coach:"W. Regragui",style:"Organized defense"},
+  BRA:{n:"Brazil",f:"🇧🇷",conf:"CONMEBOL",rank:5,elo:1995,form:["W","D","W","W","W"],grp:"D",kp:["Vinícius Jr.","R. Rodrygo","A. Militão"],coach:"D. Parrinha",style:"Attacking flair"},
+  JPN:{n:"Japan",f:"🇯🇵",conf:"AFC",rank:16,elo:1855,form:["W","W","W","D","W"],grp:"D",kp:["D. Mitoma","T. Kubo","H. Ito"],coach:"H. Moriyasu",style:"High-intensity press"},
+  CRO:{n:"Croatia",f:"🇭🇷",conf:"UEFA",rank:10,elo:1940,form:["D","W","W","D","W"],grp:"D",kp:["L. Modrić","M. Brozović","A. Kramarić"],coach:"Z. Dalić",style:"Midfield dominance"},
+  ARG:{n:"Argentina",f:"🇦🇷",conf:"CONMEBOL",rank:1,elo:2070,form:["W","W","W","D","W"],grp:"E",kp:["L. Messi","J. Álvarez","A. Martínez"],coach:"L. Scaloni",style:"Tactical champions"},
+  CHI:{n:"Chile",f:"🇨🇱",conf:"CONMEBOL",rank:31,elo:1710,form:["D","W","D","W","W"],grp:"E",kp:["A. Sánchez","B. Aranguiz","C. Bravo"],coach:"R. Berizzo",style:"High press"},
+  IVC:{n:"Ivory Coast",f:"🇨🇮",conf:"CAF",rank:34,elo:1665,form:["W","W","W","D","W"],grp:"E",kp:["S. Haller","F. Kessié","W. Zaha"],coach:"E. Faé",style:"Physical technical"},
+  FRA:{n:"France",f:"🇫🇷",conf:"UEFA",rank:2,elo:2045,form:["W","W","D","W","W"],grp:"F",kp:["K. Mbappé","A. Griezmann","A. Tchouaméni"],coach:"D. Deschamps",style:"High press versatile"},
+  URU:{n:"Uruguay",f:"🇺🇾",conf:"CONMEBOL",rank:14,elo:1860,form:["W","W","D","W","W"],grp:"F",kp:["F. Valverde","D. Núñez","R. Araújo"],coach:"M. Bielsa",style:"Compact direct"},
+  NZL:{n:"New Zealand",f:"🇳🇿",conf:"OFC",rank:48,elo:1510,form:["D","W","D","D","W"],grp:"F",kp:["C. Wood","M. Fisher","E. Goss"],coach:"D. Hay",style:"Physical direct"},
+  ESP:{n:"Spain",f:"🇪🇸",conf:"UEFA",rank:3,elo:2035,form:["W","D","W","W","W"],grp:"G",kp:["L. Yamal","P. Pedri","M. Morata"],coach:"L. de la Fuente",style:"Tiki-taka possession"},
+  SRB:{n:"Serbia",f:"🇷🇸",conf:"UEFA",rank:22,elo:1800,form:["W","D","W","W","D"],grp:"G",kp:["D. Vlahović","A. Mitrović","S. M-Savić"],coach:"D. Stojković",style:"Attacking direct"},
+  ZAF:{n:"South Africa",f:"🇿🇦",conf:"CAF",rank:37,elo:1580,form:["W","D","W","D","W"],grp:"G",kp:["P. Mothiba","R. Tau","S. Khune"],coach:"H. Mosimane",style:"Physical organized"},
+  ENG:{n:"England",f:"🏴󠁧󠁢󠁥󠁮󠁧󠁿",conf:"UEFA",rank:4,elo:2010,form:["W","W","W","W","D"],grp:"H",kp:["J. Bellingham","H. Kane","P. Foden"],coach:"G. Southgate",style:"Direct physical"},
+  SEN:{n:"Senegal",f:"🇸🇳",conf:"CAF",rank:18,elo:1835,form:["W","W","D","W","W"],grp:"H",kp:["S. Mané","K. Koulibaly","I. Sarr"],coach:"A. Cissé",style:"Physical fast"},
+  COL:{n:"Colombia",f:"🇨🇴",conf:"CONMEBOL",rank:15,elo:1850,form:["W","W","W","W","D"],grp:"H",kp:["L. Díaz","J. Cuadrado","R. Arias"],coach:"N. Lorenzo",style:"Counter-attacking"},
+  GER:{n:"Germany",f:"🇩🇪",conf:"UEFA",rank:7,elo:1980,form:["W","W","W","W","W"],grp:"I",kp:["J. Musiala","F. Wirtz","K. Havertz"],coach:"J. Nagelsmann",style:"Gegenpressing technical"},
+  GEO:{n:"Georgia",f:"🇬🇪",conf:"UEFA",rank:47,elo:1695,form:["W","W","W","D","W"],grp:"I",kp:["K. Kvaratskhelia","G. Lochoshvili","Z. Davitashvili"],coach:"W. Sagnol",style:"Organized quick"},
+  VEN:{n:"Venezuela",f:"🇻🇪",conf:"CONMEBOL",rank:44,elo:1600,form:["W","W","D","W","D"],grp:"I",kp:["Y. Rondón","J. Aramburu","A. Machis"],coach:"F. Batista",style:"Compact block"},
+  POR:{n:"Portugal",f:"🇵🇹",conf:"UEFA",rank:6,elo:1985,form:["W","W","W","D","W"],grp:"J",kp:["C. Ronaldo","R. Leão","B. Fernandes"],coach:"R. Martínez",style:"Counter-attack"},
+  TUR:{n:"Turkey",f:"🇹🇷",conf:"UEFA",rank:23,elo:1795,form:["W","W","D","W","W"],grp:"J",kp:["H. Çalhanoğlu","B. Yılmaz","M. Güler"],coach:"V. Şahin",style:"Technical modern"},
+  EGY:{n:"Egypt",f:"🇪🇬",conf:"CAF",rank:35,elo:1635,form:["W","W","D","W","D"],grp:"J",kp:["M. Salah","T. Galal","A. Hegazi"],coach:"H. El-Badry",style:"Counter-attack"},
+  NED:{n:"Netherlands",f:"🇳🇱",conf:"UEFA",rank:8,elo:1965,form:["W","W","D","W","W"],grp:"K",kp:["V. van Dijk","X. Simons","C. Gakpo"],coach:"R. Koeman",style:"Total football"},
+  IRN:{n:"Iran",f:"🇮🇷",conf:"AFC",rank:37,elo:1625,form:["W","W","D","D","W"],grp:"K",kp:["M. Taremi","S. Hajsafi","A. Ansarifard"],coach:"A. Queiroz",style:"Defensive counter"},
+  PER:{n:"Peru",f:"🇵🇪",conf:"CONMEBOL",rank:45,elo:1690,form:["D","W","D","W","W"],grp:"K",kp:["G. Lapadula","A. Carrillo","P. Gallese"],coach:"J. Fossati",style:"Counter-attack"},
+  ITA:{n:"Italy",f:"🇮🇹",conf:"UEFA",rank:11,elo:1935,form:["W","D","W","W","D"],grp:"L",kp:["G. Donnarumma","F. Chiesa","N. Barella"],coach:"L. Spalletti",style:"Defensive solid"},
+  ECU:{n:"Ecuador",f:"🇪🇨",conf:"CONMEBOL",rank:30,elo:1740,form:["W","D","W","W","D"],grp:"L",kp:["E. Valencia","M. Caicedo","A. Preciado"],coach:"S. Beccacece",style:"Physical direct"},
+  IRQ:{n:"Iraq",f:"🇮🇶",conf:"AFC",rank:39,elo:1590,form:["W","D","D","W","W"],grp:"L",kp:["A. Ameen","A. Karim","M. Ali"],coach:"J. Pekerman",style:"Compact counter"},
+  KOR:{n:"South Korea",f:"🇰🇷",conf:"AFC",rank:27,elo:1805,form:["W","W","D","W","D"],grp:"M",kp:["Son Heung-min","Lee Kang-in","K. Min-jae"],coach:"H. Liu",style:"Fast organized"},
+  GHA:{n:"Ghana",f:"🇬🇭",conf:"CAF",rank:33,elo:1640,form:["D","W","D","W","W"],grp:"M",kp:["M. Kudus","A. Ayew","T. Partey"],coach:"O. Addo",style:"Technical physical"},
+  HND:{n:"Honduras",f:"🇭🇳",conf:"CONCACAF",rank:42,elo:1570,form:["D","W","D","D","W"],grp:"M",kp:["A. Bengtson","O. Elvir","J. Quioto"],coach:"D. Rueda",style:"Defensive block"},
+  UKR:{n:"Ukraine",f:"🇺🇦",conf:"UEFA",rank:25,elo:1755,form:["W","W","D","D","W"],grp:"N",kp:["A. Mudryk","V. Zinchenko","O. Dovbyk"],coach:"S. Rebrov",style:"Technical organized"},
+  AUT:{n:"Austria",f:"🇦🇹",conf:"UEFA",rank:20,elo:1820,form:["W","W","W","D","W"],grp:"N",kp:["D. Alaba","M. Sabitzer","K. Arnautović"],coach:"R. Rangnick",style:"Gegenpressing"},
+  SAU:{n:"Saudi Arabia",f:"🇸🇦",conf:"AFC",rank:38,elo:1680,form:["W","D","W","W","D"],grp:"N",kp:["S. Al-Dawsari","M. Al-Buraikan","M. Al-Owais"],coach:"H. Renard",style:"High-line defensive"},
+  SUI:{n:"Switzerland",f:"🇨🇭",conf:"UEFA",rank:21,elo:1815,form:["W","D","W","W","D"],grp:"O",kp:["G. Xhaka","X. Shaqiri","Y. Sommer"],coach:"M. Yakin",style:"Compact defense"},
+  NGR:{n:"Nigeria",f:"🇳🇬",conf:"CAF",rank:32,elo:1780,form:["W","W","D","W","W"],grp:"O",kp:["V. Osimhen","A. Lookman","C. Chukwueze"],coach:"A. Finidi",style:"Fast transitions"},
+  CRC:{n:"Costa Rica",f:"🇨🇷",conf:"CONCACAF",rank:43,elo:1580,form:["W","D","D","W","W"],grp:"O",kp:["K. Fuller","B. Ruiz","R. Navas"],coach:"L.F. Suárez",style:"Defensive"},
+  DEN:{n:"Denmark",f:"🇩🇰",conf:"UEFA",rank:19,elo:1825,form:["W","D","W","W","W"],grp:"P",kp:["C. Eriksen","P. Høbjerg","R. Harder"],coach:"K.G. Hjulmand",style:"Organized solid"},
+  CMR:{n:"Cameroon",f:"🇨🇲",conf:"CAF",rank:35,elo:1620,form:["W","D","W","D","D"],grp:"P",kp:["V. Aboubakar","A. Onana","M. Ngamaleu"],coach:"M. Song",style:"Physical athletic"},
+  JOR:{n:"Jordan",f:"🇯🇴",conf:"AFC",rank:40,elo:1610,form:["W","D","W","D","W"],grp:"P",kp:["Y. Al-Naimat","O. Al-Smadi","M. Banikhalid"],coach:"H. Jaara",style:"Organized defense"}
+};
+
+const GROUPS = {
+  A:["USA","PAN","ALG"],B:["MEX","POL","AUS"],C:["CAN","BEL","MAR"],D:["BRA","JPN","CRO"],
+  E:["ARG","CHI","IVC"],F:["FRA","URU","NZL"],G:["ESP","SRB","ZAF"],H:["ENG","SEN","COL"],
+  I:["GER","GEO","VEN"],J:["POR","TUR","EGY"],K:["NED","IRN","PER"],L:["ITA","ECU","IRQ"],
+  M:["KOR","GHA","HND"],N:["UKR","AUT","SAU"],O:["SUI","NGR","CRC"],P:["DEN","CMR","JOR"]
+};
+
+const MATCHES = [
+  // DAY 1 - COMPLETED
+  {id:1,grp:"A",t1:"USA",t2:"PAN",date:"Jun 11",time:"14:00",venue:"Los Angeles",status:"done",s1:2,s2:0},
+  {id:2,grp:"B",t1:"MEX",t2:"POL",date:"Jun 11",time:"17:00",venue:"Mexico City",status:"done",s1:1,s2:1},
+  {id:3,grp:"C",t1:"CAN",t2:"BEL",date:"Jun 11",time:"17:00",venue:"Toronto",status:"done",s1:0,s2:2},
+  {id:4,grp:"I",t1:"GER",t2:"GEO",date:"Jun 11",time:"20:00",venue:"New York",status:"done",s1:3,s2:0},
+  {id:5,grp:"G",t1:"ESP",t2:"SRB",date:"Jun 11",time:"20:00",venue:"Miami",status:"done",s1:2,s2:0},
+  {id:6,grp:"H",t1:"ENG",t2:"SEN",date:"Jun 11",time:"23:00",venue:"Dallas",status:"done",s1:3,s2:1},
+  // DAY 2 - TODAY
+  {id:7,grp:"K",t1:"NED",t2:"IRN",date:"Jun 12",time:"11:00",venue:"Chicago",status:"next"},
+  {id:8,grp:"M",t1:"KOR",t2:"GHA",date:"Jun 12",time:"11:00",venue:"Atlanta",status:"next"},
+  {id:9,grp:"D",t1:"BRA",t2:"JPN",date:"Jun 12",time:"14:00",venue:"Los Angeles",status:"next"},
+  {id:10,grp:"J",t1:"POR",t2:"TUR",date:"Jun 12",time:"14:00",venue:"Seattle",status:"next"},
+  {id:11,grp:"E",t1:"ARG",t2:"CHI",date:"Jun 12",time:"17:00",venue:"New York",status:"next"},
+  {id:12,grp:"F",t1:"FRA",t2:"URU",date:"Jun 12",time:"17:00",venue:"Miami",status:"next"},
+  {id:13,grp:"L",t1:"ITA",t2:"ECU",date:"Jun 12",time:"20:00",venue:"Houston",status:"next"},
+  {id:14,grp:"N",t1:"UKR",t2:"AUT",date:"Jun 12",time:"20:00",venue:"Vancouver",status:"next"},
+];
+
+// ============================================================
+// MATH ENGINE
+// ============================================================
+function eloWinProb(eloA, eloB) {
+  return 1 / (1 + Math.pow(10, (eloB - eloA) / 400));
+}
+
+function matchProbs(eloA, eloB, homeAdv = 0) {
+  const adjEloA = eloA + homeAdv;
+  const rawWin = eloWinProb(adjEloA, eloB);
+  const diff = Math.abs(adjEloA - eloB);
+  const drawChance = Math.max(0.12, Math.min(0.30, 0.285 - diff * 0.00025));
+  const win = rawWin * (1 - drawChance * 0.5);
+  const loss = (1 - rawWin) * (1 - drawChance * 0.5);
+  const draw = 1 - win - loss;
+  return { win: Math.max(0.03, win), draw: Math.max(0.05, draw), loss: Math.max(0.03, loss) };
+}
+
+function toOdds(prob, margin = 1.05) {
+  return (margin / prob).toFixed(2);
+}
+
+function pct(v) { return Math.round(v * 100); }
+
+function getRisk(prob) {
+  if (prob >= 0.68) return { level:'low', label:'LOW RISK', cls:'low' };
+  if (prob >= 0.50) return { level:'med', label:'MEDIUM RISK', cls:'med' };
+  if (prob >= 0.33) return { level:'high', label:'HIGH RISK', cls:'high' };
+  return { level:'ext', label:'EXTREME RISK', cls:'ext' };
+}
+
+function getVenueBonus(ctx) {
+  if (ctx === 'homeA') return 80;
+  if (ctx === 'homeB') return -80;
+  return 0;
+}
+
+// ============================================================
+// RENDER HELPERS
+// ============================================================
+function renderMatchCard(m, clickable=true) {
+  const a = T[m.t1], b = T[m.t2];
+  if (!a || !b) return '';
+  const isDone = m.status === 'done';
+  const statusHtml = isDone
+    ? `<span class="ms done">FT</span>`
+    : `<span class="ms next">KO ${m.time}</span>`;
+  const center = isDone
+    ? `<div class="score">${m.s1}–${m.s2}</div>`
+    : `<div class="vs">VS</div>`;
+  const onClick = clickable ? `onclick="showMatchPrediction('${m.t1}','${m.t2}')"` : '';
+  return `<div class="mc" ${onClick}>
+    <div class="ts"><div class="tf">${a.f}</div><div class="tn">${a.n}</div><div class="tr">FIFA #${a.rank}</div></div>
+    <div class="mc-mid">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)">GRP ${m.grp}</span>
+      ${center}
+      <div class="mt">${m.venue}</div>
+      ${statusHtml}
+    </div>
+    <div class="ts"><div class="tf">${b.f}</div><div class="tn">${b.n}</div><div class="tr">FIFA #${b.rank}</div></div>
+  </div>`;
+}
+
+function renderPredictionCard(codeA, codeB, ctx='neutral') {
+  const a = T[codeA], b = T[codeB];
+  if (!a || !b || codeA === codeB) return '<div style="color:var(--muted);padding:1rem">Select two different teams.</div>';
+  const bonus = getVenueBonus(ctx);
+  const p = matchProbs(a.elo, b.elo, bonus);
+  const riskA = getRisk(p.win);
+  const riskB = getRisk(p.loss);
+  const eloDiff = a.elo - b.elo + bonus;
+  const favorite = eloDiff > 0 ? a : b;
+  const favProb = eloDiff > 0 ? p.win : p.loss;
+  const topRisk = getRisk(favProb);
+
+  return `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
+      <div style="font-size:.95rem;font-weight:700">${a.f} ${a.n} <span class="mu">vs</span> ${b.f} ${b.n}</div>
+      <div class="rb ${topRisk.cls}">${topRisk.label}</div>
+    </div>
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:.2rem">WIN PROBABILITY</div>
+    <div class="pb-wrap">
+      <div class="pb win" style="width:${pct(p.win)}%">${pct(p.win)}%</div>
+      <div class="pb draw" style="width:${pct(p.draw)}%">${pct(p.draw) > 7 ? pct(p.draw)+'%' : ''}</div>
+      <div class="pb loss" style="width:${pct(p.loss)}%">${pct(p.loss)}%</div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--muted);margin-bottom:.9rem">
+      <span>${a.n} WIN</span><span>DRAW</span><span>${b.n} WIN</span>
+    </div>
+    <div class="og">
+      <div class="oi"><div class="ol">${a.n.toUpperCase()} WIN</div><div class="ov" style="color:${p.win>0.5?'var(--green)':'var(--text)'}">${toOdds(p.win)}x</div><div class="op">${pct(p.win)}% implied</div></div>
+      <div class="oi"><div class="ol">DRAW</div><div class="ov" style="color:var(--amber)">${toOdds(p.draw)}x</div><div class="op">${pct(p.draw)}% implied</div></div>
+      <div class="oi"><div class="ol">${b.n.toUpperCase()} WIN</div><div class="ov" style="color:${p.loss>0.5?'var(--green)':'var(--text)'}">${toOdds(p.loss)}x</div><div class="op">${pct(p.loss)}% implied</div></div>
+    </div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:.5rem">
+      <span style="color:var(--cyan)">Elo edge:</span> ${favorite.f} ${favorite.n} by ${Math.abs(eloDiff)} pts ·
+      <span style="color:var(--acc)">Confidence: ${topRisk.label}</span>
+    </div>`;
+}
+
+function renderBetSuggestions(codeA, codeB, ctx='neutral') {
+  const a = T[codeA], b = T[codeB];
+  if (!a || !b || codeA === codeB) return '';
+  const bonus = getVenueBonus(ctx);
+  const p = matchProbs(a.elo, b.elo, bonus);
+  const favorite = p.win > p.loss ? a : b;
+  const favProb = Math.max(p.win, p.loss);
+  const underdog = p.win > p.loss ? b : a;
+  const r1 = getRisk(favProb), r2 = getRisk(p.draw + (p.win > p.loss ? p.win : p.loss));
+  const dcProb = Math.min(0.97, favProb + p.draw);
+
+  const bets = [
+    { name:`${favorite.f} ${favorite.n} to Win`, desc:`Based on Elo advantage of ${Math.abs(a.elo - b.elo + bonus)} points. ${favorite.n}'s superior ranking and recent form support this pick.`, odds:toOdds(favProb), prob:favProb, risk:getRisk(favProb) },
+    { name:`Double Chance — ${favorite.n} or Draw`, desc:`Covers win or draw for the stronger side. Reduces risk significantly while offering a safer return.`, odds:toOdds(dcProb,1.04), prob:dcProb, risk:getRisk(dcProb) },
+    { name:`Over 2.5 Goals`, desc:`Combined Elo of both teams suggests an open game. High-ranked teams tend to produce more goals vs. weaker opposition.`, odds:"2.10", prob:0.48, risk:getRisk(0.48) },
+    { name:`${underdog.f} ${underdog.n} Upset`, desc:`Underdog play — ${underdog.n} has the quality to create an upset. High risk, high reward. Use 0.5% stake max.`, odds:toOdds(p.win > p.loss ? p.loss : p.win), prob:p.win > p.loss ? p.loss : p.win, risk:getRisk(p.win > p.loss ? p.loss : p.win) },
+    { name:`Both Teams to Score`, desc:`Both squads have attacking depth. Expect at least one goal each side in a competitive World Cup group match.`, odds:"1.90", prob:0.53, risk:getRisk(0.53) },
+    { name:`${favorite.n} -1 Asian Handicap`, desc:`If the quality gap is significant, the favorite should win by multiple goals. Checks out if Elo diff > 200.`, odds:toOdds(Math.max(0.2, favProb - 0.15)), prob:Math.max(0.2, favProb - 0.15), risk:getRisk(Math.max(0.2, favProb - 0.15)) },
+  ];
+
+  return bets.map(bet => `
+    <div class="bc ${bet.risk.cls}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.3rem">
+        <div class="bname">${bet.name}</div>
+        <div class="rb ${bet.risk.cls}">${bet.risk.label}</div>
+      </div>
+      <div class="bdesc">${bet.desc}</div>
+      <span class="chip odds">${bet.odds}x</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);margin-left:.4rem">${pct(bet.prob)}% probability</span>
+    </div>`).join('');
+}
+
+function renderStatComparison(codeA, codeB) {
+  const a = T[codeA], b = T[codeB];
+  if (!a || !b) return '';
+  const stats = [
+    { label:'ELO RATING', va:a.elo, vb:b.elo, max:2200, min:1400 },
+    { label:'FIFA RANK', va:49-a.rank, vb:49-b.rank, max:48, min:1 },
+    { label:'FORM (5g)', va:formScore(a.form), vb:formScore(b.form), max:15, min:0 },
+  ];
+  return `
+    <div style="display:flex;justify-content:space-between;margin-bottom:.75rem">
+      <span style="font-weight:600;font-size:.85rem">${a.f} ${a.n}</span>
+      <span style="font-weight:600;font-size:.85rem">${b.f} ${b.n}</span>
+    </div>
+    ${stats.map(s => {
+      const normA = (s.va - s.min)/(s.max - s.min);
+      const normB = (s.vb - s.min)/(s.max - s.min);
+      return `<div class="sr">
+        <div class="sv" style="text-align:left">${s.label==='FIFA RANK'?'#'+a.rank:s.va}</div>
+        <div style="flex:1;display:flex;align-items:center;gap:.3rem">
+          <div style="flex:${normA};height:6px;background:linear-gradient(90deg,var(--acc2),var(--acc));border-radius:3px;min-width:2px;transition:flex 1s ease"></div>
+        </div>
+        <div class="sl">${s.label}</div>
+        <div style="flex:1;display:flex;align-items:center;gap:.3rem;justify-content:flex-end">
+          <div style="flex:${normB};height:6px;background:linear-gradient(90deg,var(--cyan),#06b6d4);border-radius:3px;min-width:2px;transition:flex 1s ease"></div>
+        </div>
+        <div class="sv" style="text-align:right">${s.label==='FIFA RANK'?'#'+b.rank:s.vb}</div>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:.85rem;display:flex;justify-content:space-between">
+      <div style="font-size:.78rem"><span style="color:var(--muted)">Form:</span> ${a.form.map(r=>`<span class="form-dot form-${r}">${r}</span>`).join(' ')}</div>
+      <div style="font-size:.78rem">${b.form.map(r=>`<span class="form-dot form-${r}">${r}</span>`).join(' ')} <span style="color:var(--muted)">:Form</span></div>
+    </div>`;
+}
+
+function formScore(form) {
+  return form.reduce((s,r) => s + (r==='W'?3:r==='D'?1:0), 0);
+}
+
+// ============================================================
+// BET MATRIX
+// ============================================================
+const BET_MATRIX = {
+  low: [
+    { match:"🇩🇪 Germany vs 🇻🇪 Venezuela", bet:"Germany Win", odds:"1.18x", prob:87, desc:"Elo gap of 380 pts. Germany in imperious form — 3-0 vs Georgia on Day 1. One of the safest plays of the tournament.", when:"Jun 13" },
+    { match:"🇦🇷 Argentina vs 🇨🇮 Ivory Coast", bet:"Argentina Win", odds:"1.22x", prob:84, desc:"World Champions vs. African qualifier. Messi leads a dominant squad with depth across all lines.", when:"Jun 14" },
+    { match:"🇫🇷 France vs 🇳🇿 New Zealand", bet:"France Win + Over 2.5 Goals", odds:"1.28x", prob:81, desc:"France's attacking depth (Mbappé, Griezmann) against the lowest-ranked team in the tournament.", when:"Jun 14" },
+    { match:"🇳🇱 Netherlands vs 🇮🇷 Iran", bet:"Netherlands Win", odds:"1.25x", prob:82, desc:"Van Dijk's defensive wall + Simons/Gakpo attacking. Iran historically compact but overmatched here.", when:"Jun 12" },
+    { match:"🏴󠁧󠁢󠁥󠁮󠁧󠁿 England vs 🇸🇳 Senegal", bet:"England Double Chance (Win/Draw)", odds:"1.12x", prob:91, desc:"Already proven on Day 1 (3-1). England's squad depth is top 4 in tournament. A near-certainty.", when:"DONE · ENG 3-1" },
+    { match:"🇪🇸 Spain vs 🇿🇦 South Africa", bet:"Spain -1.5 Asian Handicap", odds:"1.42x", prob:74, desc:"Spain's technical dominance vs. a CAF qualifier makes a multi-goal win highly likely.", when:"Jun 15" },
+  ],
+  med: [
+    { match:"🇧🇷 Brazil vs 🇯🇵 Japan", bet:"Brazil Win", odds:"1.62x", prob:63, desc:"Japan's press can unsettle Brazil early but quality gap is significant. Brazil Win is solid medium value.", when:"Jun 12" },
+    { match:"🇵🇹 Portugal vs 🇹🇷 Turkey", bet:"Both Teams to Score", odds:"1.88x", prob:54, desc:"Portugal's attack vs Turkey's improving squad. Turkey has scored in 8 consecutive internationals.", when:"Jun 12" },
+    { match:"🇺🇦 Ukraine vs 🇦🇹 Austria", bet:"Austria Win or Draw (Double Chance)", odds:"1.72x", prob:61, desc:"Rangnick's pressing system is well-suited for this format. Austria have been in excellent recent form.", when:"Jun 12" },
+    { match:"🇰🇷 South Korea vs 🇬🇭 Ghana", bet:"South Korea Win", odds:"1.78x", prob:58, desc:"Son Heung-min + Lee Kang-in is a dangerous combo. Ghana have quality but Korea's organization wins out.", when:"Jun 12" },
+    { match:"🇺🇸 USA vs 🇩🇿 Algeria", bet:"USA Win", odds:"1.68x", prob:62, desc:"USA playing on home soil with crowd support. Pulisic is in top form. Algeria is solid but outgunned.", when:"Jun 15" },
+    { match:"🇲🇦 Morocco vs 🇨🇦 Canada", bet:"Over 2.5 Goals", odds:"2.05x", prob:49, desc:"Both Morocco and Canada have attacking firepower. This group C clash should be open and entertaining.", when:"Jun 15" },
+  ],
+  high: [
+    { match:"🇯🇵 Japan vs 🇧🇷 Brazil", bet:"Japan Upset Win", odds:"5.80x", prob:17, desc:"Japan pulled off 2022 wins vs Germany & Spain. Their press can generate chaos — extreme risk, extreme reward.", when:"Jun 12" },
+    { match:"🇩🇿 Algeria vs 🇺🇸 USA", bet:"Algeria Win", odds:"4.20x", prob:24, desc:"Mahrez + Benrahma can tear apart a porous USA backline. Algeria showed quality in AFCON. Upset potential.", when:"Jun 15" },
+    { match:"🇬🇪 Georgia vs 🇩🇪 Germany", bet:"Georgia +2 Asian Handicap", odds:"2.85x", prob:35, desc:"Kvaratskhelia is world class. Georgia surprised everyone in Euro 2024 — compact defense can frustrate Germany.", when:"Jun 16" },
+    { match:"🇹🇷 Turkey vs 🇵🇹 Portugal", bet:"Turkey Win", odds:"4.50x", prob:22, desc:"Güler is explosive. Turkey proved in Euro 2024 they can compete with elite teams. Portugal isn't infallible.", when:"Jun 12" },
+    { match:"🇸🇳 Senegal vs 🇨🇴 Colombia", bet:"Correct Score 1-1 Draw", odds:"9.00x", prob:11, desc:"Evenly matched. Valverde's Colombia vs Mané's Senegal — a tactical battle likely to end tight.", when:"Jun 16" },
+    { match:"Tournament", bet:"🇲🇦 Morocco to Win Group C", odds:"3.20x", prob:31, desc:"Morocco beat Canada (2022 form reversal). Ziyech in full flight can lead them to group glory. Belgium beware.", when:"Outright" },
+  ]
+};
+
+// ============================================================
+// STANDINGS (after Day 1)
+// ============================================================
+const STANDINGS = {
+  A: [{t:"USA",p:3,w:1,d:0,l:0,gf:2,ga:0},{t:"ALG",p:0,w:0,d:0,l:0,gf:0,ga:0},{t:"PAN",p:0,w:0,d:0,l:0,gf:0,ga:2}],
+  B: [{t:"MEX",p:1,w:0,d:1,l:0,gf:1,ga:1},{t:"POL",p:1,w:0,d:1,l:0,gf:1,ga:1},{t:"AUS",p:0,w:0,d:0,l:0,gf:0,ga:0}],
+  C: [{t:"BEL",p:3,w:1,d:0,l:0,gf:2,ga:0},{t:"MAR",p:0,w:0,d:0,l:0,gf:0,ga:0},{t:"CAN",p:0,w:0,d:0,l:0,gf:0,ga:2}],
+  G: [{t:"ESP",p:3,w:1,d:0,l:0,gf:2,ga:0},{t:"SRB",p:0,w:0,d:0,l:0,gf:0,ga:2},{t:"ZAF",p:0,w:0,d:0,l:0,gf:0,ga:0}],
+  H: [{t:"ENG",p:3,w:1,d:0,l:0,gf:3,ga:1},{t:"COL",p:0,w:0,d:0,l:0,gf:0,ga:0},{t:"SEN",p:0,w:0,d:0,l:0,gf:1,ga:3}],
+  I: [{t:"GER",p:3,w:1,d:0,l:0,gf:3,ga:0},{t:"GEO",p:0,w:0,d:0,l:0,gf:0,ga:3},{t:"VEN",p:0,w:0,d:0,l:0,gf:0,ga:0}],
+};
+
+// ============================================================
+// CHAT ENGINE
+// ============================================================
+const CHAT_PROMPTS = [
+  "Who will win the World Cup?","Brazil vs Argentina odds?","Give me low risk bets today",
+  "Best upsets to back?","How is Germany performing?","Messi or Mbappé — whose team wins?",
+  "Group of death this year?","England's chances?","Who scores most goals?","Japan upset potential?"
+];
+
+function teamFromInput(text) {
+  const lower = text.toLowerCase();
+  for (const [code, team] of Object.entries(T)) {
+    if (lower.includes(team.n.toLowerCase()) || lower.includes(code.toLowerCase())) return code;
+  }
+  // partial name matching
+  const partials = {
+    'brazil':'BRA','argentina':'ARG','france':'FRA','england':'ENG','germany':'GER',
+    'spain':'ESP','portugal':'POR','netherlands':'NED','holland':'NED','belgium':'BEL',
+    'croatia':'CRO','italy':'ITA','japan':'JPN','south korea':'KOR','korea':'KOR',
+    'morocco':'MAR','senegal':'SEN','usa':'USA','america':'USA','mexico':'MEX',
+    'canada':'CAN','switzerland':'SUI','denmark':'DEN','austria':'AUT','ukraine':'UKR',
+    'turkey':'TUR','poland':'POL','colombia':'COL','uruguay':'URU','ghana':'GHA',
+    'nigeria':'NGR','south africa':'ZAF','georgia':'GEO','ecuador':'ECU','peru':'PER',
+    'chile':'CHI','algeria':'ALG','iran':'IRN','saudi':'SAU','nigeria':'NGR',
+    'ivory coast':'IVC','costa rica':'CRC','cameroon':'CMR','iraq':'IRQ','jordan':'JOR',
+    'venezuela':'VEN','honduras':'HND','panama':'PAN','australia':'AUS','new zealand':'NZL',
+    'egypt':'EGY','serbia':'SRB'
+  };
+  for (const [partial, code] of Object.entries(partials)) {
+    if (lower.includes(partial)) return code;
+  }
+  return null;
+}
+
+function teamMentions(text) {
+  const found = [];
+  const lower = text.toLowerCase();
+  for (const [code, team] of Object.entries(T)) {
+    if (lower.includes(team.n.toLowerCase())) found.push(code);
+  }
+  return [...new Set(found)];
+}
+
+function chatResponse(input) {
+  const l = input.toLowerCase();
+  const team1 = teamFromInput(l);
+  const mentions = teamMentions(l);
+
+  // Detect VS / prediction intent
+  const isVs = /\bvs\b|versus|against|beat|win against/.test(l);
+  const isPrediction = /predict|prediction|odds|chance|probability|who wins/.test(l);
+  const isLowRisk = /low risk|safe|sure bet|banker|guaranteed/.test(l);
+  const isHighRisk = /high risk|upset|long shot|big odds|value bet/.test(l);
+  const isMedRisk = /medium risk|medium|mid risk/.test(l);
+  const isBets = /bet|bets|bet today|recommend|what to bet/.test(l);
+  const isFavorites = /favorite|favourite|best team|who wins|champion|trophy|lift/.test(l);
+  const isGroup = /group [a-p]/.test(l);
+  const isFormat = /format|how does|how many|structure|bracket|knockout/.test(l);
+  const isPlayers = /messi|mbappe|mbapp|ronaldo|bellingham|kane|vinicius|musiala|wirtz|modric|salah|yamal|pedri|de bruyne|son heung/.test(l);
+
+  // VS match prediction
+  if (mentions.length >= 2 || (team1 && isVs)) {
+    const tA = mentions[0] || team1;
+    const tB = mentions[1] || (team1 === 'ARG' ? 'BRA' : 'ARG');
+    const a = T[tA], b = T[tB];
+    const p = matchProbs(a.elo, b.elo);
+    const fav = p.win > p.loss ? a : b;
+    const favP = Math.max(p.win, p.loss);
+    const risk = getRisk(favP);
+    return `<b>${a.f} ${a.n} vs ${b.f} ${b.n} — Match Analysis</b><br><br>
+<b>Win Probabilities:</b><br>
+${a.f} ${a.n}: <span style="color:var(--cyan)">${pct(p.win)}%</span> &nbsp;|&nbsp; Draw: <span style="color:var(--amber)">${pct(p.draw)}%</span> &nbsp;|&nbsp; ${b.f} ${b.n}: <span style="color:var(--cyan)">${pct(p.loss)}%</span><br><br>
+<b>Odds (incl. margin):</b> ${a.n}: <b>${toOdds(p.win)}x</b> · Draw: <b>${toOdds(p.draw)}x</b> · ${b.n}: <b>${toOdds(p.loss)}x</b><br><br>
+<b>Verdict:</b> ${fav.f} ${fav.n} are statistical favorites at ${pct(favP)}% probability. <span class="rb ${risk.cls}">${risk.label}</span><br><br>
+<b>Key factor:</b> Elo gap of ${Math.abs(a.elo - b.elo)} pts favors ${fav.n}. ${fav.n}'s form: ${fav.form.map(r=>`<span class="form-dot form-${r}" style="display:inline-flex">${r}</span>`).join(' ')}<br><br>
+<span style="color:var(--muted);font-size:.78rem">→ Switch to ⚡ PREDICTOR tab for full bet breakdown</span>`;
+  }
+
+  // Single team analysis
+  if (team1 && !isVs) {
+    const tm = T[team1];
+    const grpTeams = GROUPS[tm.grp].filter(c => c !== team1);
+    const p1 = matchProbs(tm.elo, T[grpTeams[0]].elo);
+    const p2 = matchProbs(tm.elo, T[grpTeams[1]].elo);
+    const advChance = Math.round((p1.win * 0.85 + p2.win * 0.85) * 100);
+    return `<b>${tm.f} ${tm.n} — Intelligence Report</b><br><br>
+🏆 <b>FIFA Ranking:</b> #${tm.rank} &nbsp;|&nbsp; <b>Elo:</b> ${tm.elo}<br>
+📋 <b>Group ${tm.grp}:</b> vs ${T[grpTeams[0]].f} ${T[grpTeams[0]].n} & ${T[grpTeams[1]].f} ${T[grpTeams[1]].n}<br>
+📈 <b>Recent Form:</b> ${tm.form.map(r=>`<span class="form-dot form-${r}" style="display:inline-flex">${r}</span>`).join(' ')} (${formScore(tm.form)}/15 pts)<br>
+⚙️ <b>Style:</b> ${tm.style}<br>
+⭐ <b>Key Players:</b> ${tm.kp.join(', ')}<br>
+👔 <b>Coach:</b> ${tm.coach}<br><br>
+<b>Group Stage Outlook:</b><br>
+vs ${T[grpTeams[0]].f} ${T[grpTeams[0]].n}: Win ${pct(p1.win)}% · Draw ${pct(p1.draw)}% · Loss ${pct(p1.loss)}%<br>
+vs ${T[grpTeams[1]].f} ${T[grpTeams[1]].n}: Win ${pct(p2.win)}% · Draw ${pct(p2.draw)}% · Loss ${pct(p2.loss)}%<br><br>
+<b>Estimated group advancement probability: ~${advChance}%</b><br>
+${advChance > 70 ? '<span class="rb low">STRONG FAVORITE TO ADVANCE</span>' : advChance > 45 ? '<span class="rb med">LIKELY TO ADVANCE</span>' : '<span class="rb high">UNCERTAIN GROUP STAGE</span>'}`;
+  }
+
+  // Tournament favorites
+  if (isFavorites) {
+    const favs = Object.entries(T).sort((a,b) => b[1].elo - a[1].elo).slice(0,5);
+    return `<b>FIFA 2026 Tournament Favorites</b> — Elo-based ranking:<br><br>
+${favs.map(([code,t],i) => {
+  const winChance = Math.round(Math.pow(eloWinProb(t.elo, 1800), 6) * 35 * (i===0?2.2:i===1?1.8:i===2?1.5:i===3?1.2:1.0));
+  return `<b>${i+1}.</b> ${t.f} ${t.n} <span class="chip odds">${(1/(winChance/100)).toFixed(1)}x</span> <span style="color:var(--muted);font-size:.75rem">~${winChance}% model est.</span>`;
+}).join('<br>')}<br><br>
+<span style="color:var(--muted)">Argentina are defending champions and Elo #1. France and Spain are the closest challengers. England and Brazil round out the top 5 with serious contention.</span>`;
+  }
+
+  // Low risk bets
+  if (isLowRisk) {
+    return `<b>Today's Low Risk Recommendations:</b><br><br>
+${BET_MATRIX.low.slice(0,4).map(b => `
+<div style="margin-bottom:.6rem;padding:.6rem;background:rgba(34,197,94,.07);border-left:2px solid var(--green);border-radius:5px">
+  <b>${b.match}</b><br>
+  <span style="color:var(--green)">${b.bet}</span> · <span class="chip odds">${b.odds}</span> · ${b.prob}% probability<br>
+  <span style="font-size:.75rem;color:var(--muted)">${b.desc}</span>
+</div>`).join('')}
+<span style="color:var(--muted);font-size:.78rem">→ See full matrix in ◎ BET MATRIX tab</span>`;
+  }
+
+  // High risk bets
+  if (isHighRisk) {
+    return `<b>High Risk / Value Plays for FIFA 2026:</b><br><br>
+${BET_MATRIX.high.slice(0,3).map(b => `
+<div style="margin-bottom:.6rem;padding:.6rem;background:rgba(239,68,68,.07);border-left:2px solid var(--red);border-radius:5px">
+  <b>${b.match}</b><br>
+  <span style="color:var(--red)">${b.bet}</span> · <span class="chip odds">${b.odds}</span> · ${b.prob}% probability<br>
+  <span style="font-size:.75rem;color:var(--muted)">${b.desc}</span>
+</div>`).join('')}
+<span style="color:var(--amber);font-size:.78rem">⚠ High risk bets: limit to 0.5–1% of total bankroll maximum</span>`;
+  }
+
+  // General bet recommendations
+  if (isBets) {
+    return `<b>Today's Bet Selections — June 12:</b><br><br>
+<span class="rb low">LOW RISK</span> Netherlands to Win vs Iran · <span class="chip odds">1.25x</span><br>
+<span style="font-size:.75rem;color:var(--muted)">Elo gap 340 pts. NED showed quality in qualifying.</span><br><br>
+<span class="rb med">MEDIUM RISK</span> Brazil Win vs Japan · <span class="chip odds">1.62x</span><br>
+<span style="font-size:.75rem;color:var(--muted)">Brazil favorite but Japan's press is dangerous early.</span><br><br>
+<span class="rb med">MEDIUM RISK</span> Argentina/Chile BTTS · <span class="chip odds">1.95x</span><br>
+<span style="font-size:.75rem;color:var(--muted)">CONMEBOL rivals — Chile will want to prove themselves.</span><br><br>
+<span class="rb high">HIGH RISK</span> Japan to Upset Brazil · <span class="chip odds">5.80x</span><br>
+<span style="font-size:.75rem;color:var(--muted)">Remember Germany & Spain in 2022. Only back with tiny stake.</span><br><br>
+<span style="color:var(--muted);font-size:.78rem">Switch to ◎ BET MATRIX for the full categorized list</span>`;
+  }
+
+  // Players
+  if (isPlayers) {
+    const playerMap = {
+      'messi': {team:'ARG', name:'L. Messi', desc:'GOAT status, 8th World Cup game. At 38, still the difference-maker for Argentina. Scored in 5/5 Argentina qualifiers.'},
+      'mbappe|mbapp': {team:'FRA', name:'K. Mbappé', desc:'Paciest forward in the tournament. France captain. 2 goals in last WC final. Tournament top scorer candidate.'},
+      'ronaldo': {team:'POR', name:'C. Ronaldo', desc:'Final chapter. At 41, still started for Portugal. Record scorer, but legs less reliable. Legacy on the line.'},
+      'bellingham': {team:'ENG', name:'J. Bellingham', desc:'England\'s heartbeat — box-to-box dynamo with 12+ goals for England in 2025. Should have massive tournament.'},
+      'kane': {team:'ENG', name:'H. Kane', desc:'England\'s all-time record scorer. Finally in a major tournament with England as genuine contenders.'},
+      'musiala|wirtz': {team:'GER', name:'Musiala & Wirtz', desc:'The most exciting young midfield pair in the world. Combination play has been unreal — Germany\'s title hopes rest on them.'},
+      'modric': {team:'CRO', name:'L. Modrić', desc:'Croatia\'s eternal engine at 40+. Passing accuracy remains elite. Final tournament, final dance.'},
+      'salah': {team:'EGY', name:'M. Salah', desc:'Egypt\'s talisman. In arguably the best form of his career at 33. Can drag Egypt through the group stage alone.'},
+      'vinicius': {team:'BRA', name:'Vinícius Jr.', desc:'Brazil\'s main man — Ballon d\'Or-caliber. Pace, skill, clinical finishing. The most dangerous winger in this tournament.'},
+      'yamal|pedri': {team:'ESP', name:'Yamal & Pedri', desc:'Spain\'s brilliance defined — Yamal at 18 is generational talent, Pedri the metronome. The most polished midfield in the tournament.'},
+      'de bruyne': {team:'BEL', name:'K. De Bruyne', desc:'Belgium\'s final contender. Arguably the best player never to win a World Cup. Motivated and still elite.'},
+      'son heung': {team:'KOR', name:'Son Heung-min', desc:'Korea\'s captain and best player. Top 10 forwards globally. Can carry Korea past the group stage with big performances.'},
+    };
+    for (const [key, player] of Object.entries(playerMap)) {
+      if (new RegExp(key).test(l)) {
+        const tm = T[player.team];
+        return `<b>${tm.f} ${player.name} — Player Intel</b><br><br>${player.desc}<br><br>
+<b>Team context:</b> ${tm.n} (Elo #${Object.values(T).sort((a,b)=>b.elo-a.elo).findIndex(t=>t.n===tm.n)+1}) · Group ${tm.grp}<br>
+<span style="color:var(--muted);font-size:.78rem">Ask me about their team: "How will ${tm.n} do at the World Cup?"</span>`;
+      }
+    }
+  }
+
+  // Group query
+  const grpMatch = l.match(/group\s+([a-p])/i);
+  if (grpMatch) {
+    const grp = grpMatch[1].toUpperCase();
+    const teams = GROUPS[grp];
+    if (teams) {
+      const sorted = teams.map(c => T[c]).sort((a,b) => b.elo - a.elo);
+      return `<b>Group ${grp} Analysis</b><br><br>
+${sorted.map((t,i) => `${i+1}. ${t.f} ${t.n} — Elo: ${t.elo} · FIFA #${t.rank}`).join('<br>')}<br><br>
+<b>Prediction:</b> ${sorted[0].f} ${sorted[0].n} to win the group (~${Math.round(65 + (sorted[0].elo - sorted[1].elo)/20)}% likely)<br>
+<b>2nd place contest:</b> ${sorted[1].f} ${sorted[1].n} vs ${sorted[2].f} ${sorted[2].n}<br>
+Win probability 2nd vs 3rd: ${pct(matchProbs(sorted[1].elo, sorted[2].elo).win)}%<br><br>
+<span class="rb ${getRisk(eloWinProb(sorted[0].elo,sorted[1].elo)).cls}">${sorted[0].n} group win: ${getRisk(eloWinProb(sorted[0].elo,sorted[1].elo)).label}</span>`;
+    }
+  }
+
+  // Format question
+  if (isFormat) {
+    return `<b>FIFA World Cup 2026 — Format Guide</b><br><br>
+📊 <b>Teams:</b> 48 nations (largest ever)<br>
+📋 <b>Groups:</b> 16 groups of 3 (A through P)<br>
+⬆️ <b>Advancing:</b> Top 2 from each group (32 teams) + 8 best 3rd-place finishers = 32 teams in knockout round<br>
+🏟️ <b>Venues:</b> USA, Canada, Mexico (3 host nations)<br>
+📅 <b>Group Stage:</b> June 11 – June 27<br>
+📅 <b>Round of 32:</b> June 29 – July 4<br>
+📅 <b>Final:</b> July 19, 2026 (MetLife Stadium, NJ)<br><br>
+<b>Total Matches:</b> 104 (vs 64 in Qatar 2022)<br>
+<b>Bookmakers' tip:</b> More 3-team groups = more decisive 3rd-place battles with upset potential`;
+  }
+
+  // Medium risk
+  if (isMedRisk) {
+    return `<b>Medium Risk Value Bets — FIFA 2026:</b><br><br>
+${BET_MATRIX.med.slice(0,4).map(b => `
+<div style="margin-bottom:.6rem;padding:.6rem;background:rgba(245,158,11,.07);border-left:2px solid var(--amber);border-radius:5px">
+  <b>${b.match}</b><br>
+  <span style="color:var(--amber)">${b.bet}</span> · <span class="chip odds">${b.odds}</span> · ${b.prob}% probability<br>
+  <span style="font-size:.75rem;color:var(--muted)">${b.desc}</span>
+</div>`).join('')}`;
+  }
+
+  // Group of death
+  if (l.includes('group of death') || (l.includes('group') && l.includes('hard'))) {
+    return `<b>Group of Death — FIFA 2026</b><br><br>
+The consensus "group of death" is <b>Group H</b>:<br><br>
+🏴󠁧󠁢󠁥󠁮󠁧󠁿 <b>England</b> (Elo: 2010 · #4 world)<br>
+🇨🇴 <b>Colombia</b> (Elo: 1850 · #15 world) — Copa América finalists 2024<br>
+🇸🇳 <b>Senegal</b> (Elo: 1835 · #18 world) — African champions<br><br>
+Any of these three could eliminate one of the other two. England have the edge but Colombia and Senegal are genuinely dangerous.<br><br>
+<b>Also notable:</b> Group C (Canada, Belgium, Morocco) and Group D (Brazil, Japan, Croatia)<br><br>
+<span class="rb med">MEDIUM RISK</span> Backing Colombia or Senegal to qualify offers value at current odds`;
+  }
+
+  // Day 1 results
+  if (l.includes('result') || l.includes('score') || l.includes('yesterday') || l.includes('day 1') || l.includes('what happened')) {
+    return `<b>Day 1 Results — June 11, 2026:</b><br><br>
+🇺🇸 USA <b>2–0</b> Panama 🇵🇦 · Group A<br>
+<span style="font-size:.75rem;color:var(--muted)">Pulisic penalty + 2nd half goal. Dominant home performance.</span><br><br>
+🇲🇽 Mexico <b>1–1</b> Poland 🇵🇱 · Group B<br>
+<span style="font-size:.75rem;color:var(--muted)">Lewandowski equalizer in 78'. Mexico lead via Lozano early.</span><br><br>
+🇧🇪 Belgium <b>2–0</b> Canada 🇨🇦 · Group C<br>
+<span style="font-size:.75rem;color:var(--muted)">De Bruyne masterclass. Canada disappointed on home soil.</span><br><br>
+🇩🇪 Germany <b>3–0</b> Georgia 🇬🇪 · Group I<br>
+<span style="font-size:.75rem;color:var(--muted)">Musiala brace. Kvaratskhelia isolated vs brilliant German press.</span><br><br>
+🇪🇸 Spain <b>2–0</b> Serbia 🇷🇸 · Group G<br>
+<span style="font-size:.75rem;color:var(--muted)">Yamal dictated. Morata clinical. Spain looked like champions.</span><br><br>
+🏴󠁧󠁢󠁥󠁮󠁧󠁿 England <b>3–1</b> Senegal 🇸🇳 · Group H<br>
+<span style="font-size:.75rem;color:var(--muted)">Kane hat-trick. Mané pulled one back but England were dominant.</span>`;
+  }
+
+  // Today's matches
+  if (l.includes('today') || l.includes('tonight') || l.includes('june 12') || l.includes('this evening')) {
+    const todayMs = MATCHES.filter(m => m.status === 'next');
+    return `<b>Today's Matches — June 12, 2026:</b><br><br>
+${todayMs.map(m => {
+  const a = T[m.t1], b = T[m.t2];
+  const p = matchProbs(a.elo, b.elo);
+  const fav = p.win > p.loss ? a : b;
+  const favPct = pct(Math.max(p.win, p.loss));
+  return `${a.f} ${a.n} vs ${b.f} ${b.n} · <b>${m.time}</b> · ${m.venue}<br><span style="font-size:.75rem;color:var(--muted)">Prediction: ${fav.n} favored @ ${favPct}%</span>`;
+}).join('<br><br>')}`;
+  }
+
+  // Fallback — smart default
+  return `<b>ORACLE Analysis:</b> I can provide detailed intelligence on any FIFA 2026 topic.<br><br>
+Try asking me:<br>
+• <i>"Brazil vs Argentina — who wins?"</i><br>
+• <i>"Analyze France's chances"</i><br>
+• <i>"Give me low risk bets"</i><br>
+• <i>"Who are the favorites to win?"</i><br>
+• <i>"What happened in yesterday's games?"</i><br>
+• <i>"Tell me about Group D"</i><br>
+• <i>"Messi or Mbappé?"</i><br><br>
+<span style="color:var(--muted);font-size:.78rem">Powered by Elo statistical modeling + FIFA ranking data</span>`;
+}
+
+// ============================================================
+// UI CONTROLLERS
+// ============================================================
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(b => b.classList.remove('active'));
+  document.getElementById(`panel-${name}`).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function showMatchPrediction(t1, t2) {
+  showPanel('predictor');
+  document.querySelectorAll('.ntab').forEach((b,i) => { if(i===1) b.classList.add('active'); else b.classList.remove('active'); });
+  document.getElementById('teamA').value = t1;
+  document.getElementById('teamB').value = t2;
+  updatePrediction();
+}
+
+function updatePrediction() {
+  const tA = document.getElementById('teamA').value;
+  const tB = document.getElementById('teamB').value;
+  const ctx = document.getElementById('venueCtx').value;
+  if (!tA || !tB || tA === tB) {
+    document.getElementById('predOut').innerHTML = '<div class="card-hdr">⚡ PREDICTION OUTPUT</div><div style="color:var(--muted);font-size:.84rem;text-align:center;padding:2rem 0">Select two different teams</div>';
+    document.getElementById('betSugWrap').style.display = 'none';
+    document.getElementById('statsWrap').style.display = 'none';
+    return;
+  }
+  document.getElementById('predOut').innerHTML = '<div class="card-hdr">⚡ PREDICTION OUTPUT</div>' + renderPredictionCard(tA, tB, ctx);
+  document.getElementById('betSugGrid').innerHTML = renderBetSuggestions(tA, tB, ctx);
+  document.getElementById('betSugWrap').style.display = 'block';
+  document.getElementById('statsBody').innerHTML = renderStatComparison(tA, tB);
+  document.getElementById('statsWrap').style.display = 'block';
+}
+
+function filterTeams() {
+  const q = document.getElementById('tsearch').value.toLowerCase();
+  renderTeamGrid(q);
+}
+
+function renderTeamGrid(filter = '') {
+  const grid = document.getElementById('teamGrid');
+  const codes = Object.keys(T).filter(c => {
+    if (!filter) return true;
+    return T[c].n.toLowerCase().includes(filter) || c.toLowerCase().includes(filter) || T[c].conf.toLowerCase().includes(filter);
+  });
+  grid.innerHTML = codes.map(code => {
+    const t = T[code];
+    const grpTeams = GROUPS[t.grp].filter(c => c !== code);
+    const eloRank = Object.values(T).sort((a,b) => b.elo - a.elo).findIndex(tm => tm.n === t.n) + 1;
+    return `<div class="tc">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
+        <div style="font-size:2.2rem;line-height:1">${t.f}</div>
+        <div>
+          <div style="font-weight:700;font-size:.95rem">${t.n}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)">FIFA #${t.rank} · ELO #${eloRank} · ${t.conf}</div>
+        </div>
+        <div style="margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.8rem;color:var(--cyan);font-weight:700">${t.elo}</div>
+      </div>
+      <div style="margin-bottom:.6rem;font-size:.72rem;color:var(--muted)">
+        <span style="color:var(--acc)">Group ${t.grp}:</span> ${grpTeams.map(c => T[c] ? T[c].f + ' ' + T[c].n : c).join(', ')}
+      </div>
+      <div style="margin-bottom:.6rem;font-size:.72rem;color:var(--muted)">
+        <span style="color:var(--acc)">Style:</span> ${t.style}
+      </div>
+      <div style="margin-bottom:.65rem;font-size:.72rem;color:var(--muted)">
+        <span style="color:var(--acc)">Key:</span> ${t.kp.join(' · ')}
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;gap:.2rem">${t.form.map(r => `<span class="form-dot form-${r}">${r}</span>`).join('')}</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted)">Form: ${formScore(t.form)}/15</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// Bet matrix rendering
+function renderBetMatrix() {
+  ['low','med','high'].forEach(level => {
+    const el = document.getElementById(level === 'low' ? 'lowBets' : level === 'med' ? 'medBets' : 'highBets');
+    el.innerHTML = BET_MATRIX[level].map(b => `
+      <div class="bc ${level}">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:.5rem;margin-bottom:.4rem">
+          <div class="bname">${b.match}</div>
+          <div class="rb ${level}" style="flex-shrink:0">${level === 'low' ? 'LOW' : level === 'med' ? 'MED' : 'HIGH'}</div>
+        </div>
+        <div style="color:var(--${level === 'low' ? 'green' : level === 'med' ? 'amber' : 'red'});font-weight:600;font-size:.82rem;margin-bottom:.35rem">📌 ${b.bet}</div>
+        <div class="bdesc">${b.desc}</div>
+        <div style="display:flex;align-items:center;gap:.5rem;margin-top:.5rem;flex-wrap:wrap">
+          <span class="chip odds">${b.odds}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted)">${b.prob}% probability</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--acc)">${b.when}</span>
+        </div>
+      </div>`).join('');
+  });
+}
+
+// ============================================================
+// CHAT
+// ============================================================
+let chatHistory = [];
+
+function addMsg(text, isUser = false) {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className = `msg ${isUser ? 'user' : ''}`;
+  div.innerHTML = `
+    <div class="avatar ${isUser ? 'av-user' : 'av-oracle'}">${isUser ? '👤' : '◈'}</div>
+    <div class="mbody ${isUser ? 'user' : 'oracle'}">${text}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('chatMsgs');
+  const div = document.createElement('div');
+  div.className = 'msg';
+  div.id = 'typing-indicator';
+  div.innerHTML = `<div class="avatar av-oracle">◈</div><div class="mbody oracle"><div class="typing"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function sendMsg() {
+  const input = document.getElementById('chatIn');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addMsg(text, true);
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    const response = chatResponse(text);
+    addMsg(response);
+  }, 600 + Math.random() * 500);
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  // Header date
+  document.getElementById('hdrDate').textContent = new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+
+  // Completed matches
+  const comp = MATCHES.filter(m => m.status === 'done');
+  document.getElementById('completedMatches').innerHTML = comp.map(m => renderMatchCard(m, false)).join('');
+
+  // Today's matches
+  const today = MATCHES.filter(m => m.status === 'next');
+  document.getElementById('todayMatches').innerHTML = today.map(m => renderMatchCard(m, true)).join('');
+
+  // Predictor dropdowns
+  const teamList = Object.entries(T).sort((a,b) => a[1].rank - b[1].rank);
+  ['teamA','teamB'].forEach((id, idx) => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = teamList.map(([c,t]) => `<option value="${c}">${t.f} ${t.n} (${t.conf})</option>`).join('');
+    if (idx === 0) sel.value = 'BRA';
+    if (idx === 1) sel.value = 'ARG';
+  });
+  updatePrediction();
+
+  // Bet matrix
+  renderBetMatrix();
+
+  // Team grid
+  renderTeamGrid();
+
+  // Chat init
+  addMsg(`<b>ORACLE online.</b> Welcome to FIFA 2026 Prediction Intelligence.<br><br>
+It's Day 2 of the tournament — 6 matches completed yesterday, 8 today. Argentina, France, Spain, England, and Germany are your statistical favorites to lift the trophy on July 19.<br><br>
+Ask me anything: match predictions, odds analysis, team intelligence, risk-rated bet recommendations, or which upsets to watch for. I process all 48 teams through Elo-based probability modeling.<br><br>
+<span style="color:var(--muted);font-size:.78rem">⚠ Statistical analysis only — not financial advice. Always gamble responsibly.</span>`);
+
+  // Quick prompts
+  document.getElementById('quickPs').innerHTML = CHAT_PROMPTS.map(p => `<button class="qp" onclick="document.getElementById('chatIn').value='${p}';sendMsg()">${p}</button>`).join('');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

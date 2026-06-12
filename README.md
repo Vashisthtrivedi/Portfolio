@@ -306,6 +306,22 @@
             <span class="mono text-[10px] text-amber-500">ARCH</span>
         </a>
 
+        <!-- FIFA 2026 Predictor Section -->
+        <div class="pt-8">
+            <h2 class="mono text-[11px] font-bold text-slate-400 tracking-widest uppercase mb-4">/FIFA 2026 Prediction Intelligence</h2>
+            <a href="fifa-predictor.html" class="cyber-card flex items-center p-5 rounded-lg group border border-purple-500/30 hover:border-purple-500/70 transition-all" style="background:linear-gradient(135deg,rgba(139,92,246,0.08),rgba(6,182,212,0.05))">
+                <div style="font-size:2.2rem;margin-right:1rem">⚽</div>
+                <div class="flex-grow">
+                    <p class="font-bold text-slate-100 group-hover:text-white text-base">ORACLE · Bet Prediction Engine</p>
+                    <p class="mono text-[10px] text-slate-400 mt-1">Elo-based match predictions · Risk-rated bet matrix · AI analyst chat · 48 teams · Live tournament</p>
+                </div>
+                <div class="flex flex-col items-end gap-1 ml-3">
+                    <span class="mono text-[9px] text-green-400" style="animation:pulse 2s infinite">● LIVE</span>
+                    <span class="mono text-[9px] text-purple-400">LAUNCH →</span>
+                </div>
+            </a>
+        </div>
+
         <!-- Contact Area -->
         <div class="pt-10 flex flex-col items-center">
             <a href="mailto:3vedivashisth@gmail.com" class="w-full bg-white text-black font-black py-4 px-8 rounded-sm hover:bg-purple-500 hover:text-white transition-all duration-300 flex justify-between items-center group">
